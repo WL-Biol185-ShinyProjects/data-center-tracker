@@ -23,5 +23,8 @@ l25 <- read.csv("data-center-data/low_growth_25_market_gravity.csv")
 l50 <- read.csv("data-center-data/low_growth_50_market_gravity.csv")
 l75 <- read.csv("data-center-data/low_growth_75_market_gravity.csv")
 l100 <- read.csv("data-center-data/low_growth_100_market_gravity.csv")
+
+dt <- rbind(h0, h25, h50, h75, h100, hir0, hir25, hir50, hir75, hir100, m0, m25, m50, m75, m100, l0, l25, l50, l75, l100)
+
 ```
 
