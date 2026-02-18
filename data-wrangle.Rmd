@@ -114,6 +114,35 @@ print(head(first))
 ```
 
 ```{r}
+# Function to clean 
+cleanupFunct <- function(X){
+# BODY
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
+  
+  
+  
+  
+# dataframes_list cleanup
+employment <- lapply(dataframes_list, cleanupFunct() {
+  
+  if (attr(alabama, "All Employees in Total Covered Total, all industries for All establishment sizes in Alabama -- Statewide, NSA") == "All Employees in Total Covered Total, all industries for All establishment sizes in Alabama -- Statewide, NSA") {
+  } else { 
+    NA }  
+  
+})
+
 
 ```
 
