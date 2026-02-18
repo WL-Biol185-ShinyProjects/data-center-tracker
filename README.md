@@ -100,3 +100,11 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 - `data/qcew_state_private_wages.csv` - state private-sector QCEW wage inputs.
 - `data/state_levels_panel.csv` - levels panel for GDP/job vs wages.
 - `data/state_levels_long.csv` - tidy long version of levels metrics.
+
+## App Notes
+
+- `Levels Comparison` now includes:
+  - a state choropleth map for a selected levels metric
+  - a GDP/job vs real-wage scatter
+  - a rankings table
+- If the selected year lacks RPP-backed real wages (for example 2024), the app automatically shows the latest available year for that metric.

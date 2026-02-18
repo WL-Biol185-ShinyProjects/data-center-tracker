@@ -25,6 +25,23 @@ to_title <- function(x) {
   tools::toTitleCase(x)
 }
 
+choose_best_year <- function(selected_year, available_years) {
+  if (selected_year %in% available_years) {
+    return(selected_year)
+  }
+  lower_years <- available_years[available_years <= selected_year]
+  if (length(lower_years) > 0) {
+    return(max(lower_years))
+  }
+  min(available_years)
+}
+
+levels_metric_labels <- c(
+  gdp_per_job_real_2017 = "GDP per Job (Real, 2017 dollars)",
+  qcew_avg_weekly_wage_real_rpp = "Weekly Wage (Real, RPP-adjusted)",
+  wage_to_productivity_ratio_real = "Wage-to-Productivity Ratio"
+)
+
 ui <- fluidPage(
   titlePanel("Productivity vs Wages Atlas"),
   sidebarLayout(
@@ -32,7 +49,8 @@ ui <- fluidPage(
       width = 3,
       p("Private nonfarm, state-level annual metrics from the BLS productivity family."),
       selectInput("year", "Year", choices = NULL),
-      selectInput("state", "State", choices = NULL)
+      selectInput("state", "State", choices = NULL),
+      selectInput("levels_metric", "Levels Map Metric", choices = levels_metric_labels)
     ),
     mainPanel(
       width = 9,
@@ -44,6 +62,8 @@ ui <- fluidPage(
         tabPanel(
           "Levels Comparison",
           p("Cross-sectional levels view: BEA real GDP per job vs QCEW private-sector wages (RPP-adjusted)."),
+          uiOutput("levels_year_note"),
+          plotOutput("levels_map", height = "520px"),
           plotOutput("levels_scatter", height = "420px"),
           tableOutput("levels_rank_table")
         ),
@@ -189,8 +209,78 @@ server <- function(input, output, session) {
   })
 
   levels_yearly_data <- reactive({
-    req(levels_data(), input$year)
-    levels_data() %>% filter(year == input$year)
+    req(levels_data(), input$year, input$levels_metric)
+    df <- levels_data()
+    available_years <- sort(unique(df$year[!is.na(df[[input$levels_metric]])]))
+    req(length(available_years) > 0)
+    effective_year <- choose_best_year(input$year, available_years)
+    df %>% filter(year == effective_year)
+  })
+
+  levels_effective_year <- reactive({
+    req(levels_yearly_data())
+    unique(levels_yearly_data()$year)[1]
+  })
+
+  output$levels_year_note <- renderUI({
+    validate(
+      need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
+    )
+
+    if (isTRUE(levels_effective_year() == input$year)) {
+      return(NULL)
+    }
+
+    tags$div(
+      class = "alert alert-info",
+      paste0(
+        "Levels data for ", input$year, " is unavailable for the selected metric. ",
+        "Showing ", levels_effective_year(), " instead."
+      )
+    )
+  })
+
+  output$levels_map <- renderPlot({
+    validate(
+      need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
+    )
+
+    metric_col <- input$levels_metric
+    metric_label <- levels_metric_labels[[metric_col]]
+    plot_df <- levels_yearly_data() %>%
+      select(state_name, value = all_of(metric_col))
+
+    us_map <- map_data("state")
+    map_df <- us_map %>%
+      left_join(plot_df, by = c("region" = "state_name"))
+
+    value_labels <- if (metric_col %in% c("gdp_per_job_real_2017", "qcew_avg_weekly_wage_real_rpp")) {
+      label_dollar(accuracy = 1)
+    } else {
+      label_number(accuracy = 0.001)
+    }
+
+    ggplot(map_df, aes(long, lat, group = group, fill = value)) +
+      geom_polygon(color = "white", linewidth = 0.15) +
+      coord_fixed(1.3) +
+      scale_fill_viridis_c(
+        option = "C",
+        na.value = "grey90",
+        labels = value_labels,
+        name = metric_label
+      ) +
+      labs(
+        title = paste("Levels Map (", levels_effective_year(), ")", sep = ""),
+        subtitle = metric_label,
+        x = NULL,
+        y = NULL
+      ) +
+      theme_minimal(base_size = 12) +
+      theme(
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank()
+      )
   })
 
   output$levels_scatter <- renderPlot({
@@ -211,7 +301,7 @@ server <- function(input, output, session) {
       scale_x_continuous(labels = label_dollar()) +
       scale_y_continuous(labels = label_dollar()) +
       labs(
-        title = paste("State Levels Comparison (", input$year, ")", sep = ""),
+        title = paste("State Levels Comparison (", levels_effective_year(), ")", sep = ""),
         subtitle = "x: BEA real GDP per job | y: QCEW private average weekly wage (RPP-adjusted)",
         x = "Real GDP per job (2017 dollars)",
         y = "Real weekly wage (RPP-adjusted)"
@@ -230,7 +320,8 @@ server <- function(input, output, session) {
         `GDP per Job (Real)` = round(gdp_per_job_real_2017, 0),
         `Weekly Wage (Nominal)` = round(qcew_avg_weekly_wage_nominal, 0),
         `Weekly Wage (Real, RPP)` = round(qcew_avg_weekly_wage_real_rpp, 0),
-        `RPP` = round(rpp_all_items_index, 1)
+        `RPP` = round(rpp_all_items_index, 1),
+        `Wage/Productivity Ratio` = round(wage_to_productivity_ratio_real, 4)
       ) %>%
       arrange(desc(`GDP per Job (Real)`))
   })
