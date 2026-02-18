@@ -59,7 +59,7 @@ Note: ETL v1 currently fetches BLS state productivity-family series through FRED
 1. Install required R packages:
 
 ```r
-install.packages(c("shiny", "dplyr", "tidyr", "ggplot2", "maps", "scales", "testthat"))
+install.packages(c("shiny", "dplyr", "tidyr", "ggplot2", "maps", "scales", "testthat", "plotly"))
 ```
 
 2. Build data outputs:
@@ -105,6 +105,9 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 
 - `Levels Comparison` now includes:
   - a state choropleth map for a selected levels metric
-  - a GDP/job vs real-wage scatter
+  - a GDP/job vs real-wage scatter (interactive hover tooltips when `plotly` is installed; static labeled fallback otherwise)
   - a rankings table
-- If the selected year lacks RPP-backed real wages (for example 2024), the app automatically shows the latest available year for that metric.
+- Year selection is strict:
+  - the app only allows years with complete levels-comparison inputs for the selected metric (no silent fallback to another year)
+- Each analysis tab includes a CSV download button for the currently filtered view.
+- A data-freshness banner shows source coverage windows by metric.

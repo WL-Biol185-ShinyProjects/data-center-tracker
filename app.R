@@ -25,15 +25,15 @@ to_title <- function(x) {
   tools::toTitleCase(x)
 }
 
-choose_best_year <- function(selected_year, available_years) {
-  if (selected_year %in% available_years) {
-    return(selected_year)
+range_label <- function(values) {
+  years <- sort(unique(values[!is.na(values)]))
+  if (length(years) == 0) {
+    return("No data")
   }
-  lower_years <- available_years[available_years <= selected_year]
-  if (length(lower_years) > 0) {
-    return(max(lower_years))
+  if (length(years) == 1) {
+    return(as.character(years))
   }
-  min(available_years)
+  paste0(min(years), "-", max(years))
 }
 
 levels_metric_labels <- c(
@@ -55,17 +55,36 @@ ui <- fluidPage(
     mainPanel(
       width = 9,
       uiOutput("missing_data_notice"),
+      uiOutput("data_freshness_banner"),
       tabsetPanel(
-        tabPanel("Map View", plotOutput("gap_map", height = "550px")),
-        tabPanel("State Comparison", plotOutput("state_trends", height = "420px")),
-        tabPanel("Gap Rankings", tableOutput("rank_table")),
+        id = "main_tab",
+        tabPanel(
+          "Map View",
+          plotOutput("gap_map", height = "550px"),
+          tags$br(),
+          downloadButton("download_gap_map", "Download Map Data (CSV)")
+        ),
+        tabPanel(
+          "State Comparison",
+          plotOutput("state_trends", height = "420px"),
+          tags$br(),
+          downloadButton("download_state_trends", "Download State Trend Data (CSV)")
+        ),
+        tabPanel(
+          "Gap Rankings",
+          tableOutput("rank_table"),
+          tags$br(),
+          downloadButton("download_rankings", "Download Ranking Data (CSV)")
+        ),
         tabPanel(
           "Levels Comparison",
           p("Cross-sectional levels view: BEA real GDP per job vs QCEW private-sector wages (RPP-adjusted)."),
-          uiOutput("levels_year_note"),
+          uiOutput("levels_unavailable_note"),
           plotOutput("levels_map", height = "520px"),
-          plotOutput("levels_scatter", height = "420px"),
-          tableOutput("levels_rank_table")
+          uiOutput("levels_scatter_ui"),
+          tableOutput("levels_rank_table"),
+          tags$br(),
+          downloadButton("download_levels", "Download Levels Data (CSV)")
         ),
         tabPanel(
           "About",
@@ -95,10 +114,7 @@ server <- function(input, output, session) {
     df <- panel_data()
     req(!is.null(df), nrow(df) > 0)
 
-    years <- sort(unique(df$year))
     states <- sort(unique(df$state_name))
-
-    updateSelectInput(session, "year", choices = years, selected = max(years))
     updateSelectInput(
       session,
       "state",
@@ -107,13 +123,89 @@ server <- function(input, output, session) {
     )
   })
 
+  observe({
+    growth_df <- panel_data()
+    req(!is.null(growth_df), nrow(growth_df) > 0)
+
+    years <- sort(unique(growth_df$year))
+
+    if (identical(input$main_tab, "Levels Comparison") && !is.null(levels_data()) && !is.null(input$levels_metric)) {
+      ldf <- levels_data()
+      metric_col <- input$levels_metric
+
+      if (metric_col %in% names(ldf)) {
+        metric_ok <- !is.na(ldf[[metric_col]])
+        scatter_ok <- !is.na(ldf$gdp_per_job_real_2017) & !is.na(ldf$qcew_avg_weekly_wage_real_rpp)
+        candidate_years <- sort(unique(ldf$year[metric_ok & scatter_ok]))
+        if (length(candidate_years) > 0) {
+          years <- candidate_years
+        }
+      }
+    }
+
+    selected_year <- isolate(input$year)
+    selected_year <- if (!is.null(selected_year) && selected_year %in% years) selected_year else max(years)
+    updateSelectInput(session, "year", choices = years, selected = selected_year)
+  })
+
   output$missing_data_notice <- renderUI({
-    if (!is.null(panel_data())) {
+    if (!is.null(panel_data()) && !is.null(levels_data())) {
       return(NULL)
     }
+
+    notes <- list()
+    if (is.null(panel_data())) {
+      notes <- c(notes, tags$li("Growth data missing: run `Rscript data-raw/run_all.R`."))
+    }
+    if (is.null(levels_data())) {
+      notes <- c(notes, tags$li("Levels data missing: run `Rscript data-raw/run_levels_all.R`."))
+    }
+
     tags$div(
       class = "alert alert-warning",
-      "Data not found. Run `Rscript data-raw/run_all.R` from the project root first."
+      tags$strong("Data setup required:"),
+      tags$ul(notes)
+    )
+  })
+
+  output$data_freshness_banner <- renderUI({
+    if (is.null(panel_data()) && is.null(levels_data())) {
+      return(NULL)
+    }
+
+    growth_span <- if (!is.null(panel_data())) {
+      range_label(panel_data()$year)
+    } else {
+      "No data"
+    }
+
+    levels_span_gdp <- if (!is.null(levels_data())) {
+      range_label(levels_data()$year[!is.na(levels_data()$gdp_per_job_real_2017)])
+    } else {
+      "No data"
+    }
+
+    levels_span_qcew_nominal <- if (!is.null(levels_data())) {
+      range_label(levels_data()$year[!is.na(levels_data()$qcew_avg_weekly_wage_nominal)])
+    } else {
+      "No data"
+    }
+
+    levels_span_qcew_real <- if (!is.null(levels_data())) {
+      range_label(levels_data()$year[!is.na(levels_data()$qcew_avg_weekly_wage_real_rpp)])
+    } else {
+      "No data"
+    }
+
+    tags$div(
+      class = "alert alert-info",
+      tags$strong("Data Freshness"),
+      tags$ul(
+        tags$li(paste("Growth panel (BLS productivity-family):", growth_span)),
+        tags$li(paste("Levels GDP/job (BEA):", levels_span_gdp)),
+        tags$li(paste("Levels weekly wage nominal (QCEW):", levels_span_qcew_nominal)),
+        tags$li(paste("Levels weekly wage real (QCEW + RPP):", levels_span_qcew_real))
+      )
     )
   })
 
@@ -209,34 +301,22 @@ server <- function(input, output, session) {
   })
 
   levels_yearly_data <- reactive({
-    req(levels_data(), input$year, input$levels_metric)
-    df <- levels_data()
-    available_years <- sort(unique(df$year[!is.na(df[[input$levels_metric]])]))
-    req(length(available_years) > 0)
-    effective_year <- choose_best_year(input$year, available_years)
-    df %>% filter(year == effective_year)
+    req(levels_data(), input$year)
+    levels_data() %>% filter(year == input$year)
   })
 
-  levels_effective_year <- reactive({
-    req(levels_yearly_data())
-    unique(levels_yearly_data()$year)[1]
-  })
-
-  output$levels_year_note <- renderUI({
+  output$levels_unavailable_note <- renderUI({
     validate(
       need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
     )
 
-    if (isTRUE(levels_effective_year() == input$year)) {
+    if (nrow(levels_yearly_data()) > 0) {
       return(NULL)
     }
 
     tags$div(
-      class = "alert alert-info",
-      paste0(
-        "Levels data for ", input$year, " is unavailable for the selected metric. ",
-        "Showing ", levels_effective_year(), " instead."
-      )
+      class = "alert alert-warning",
+      paste0("No levels data available for year ", input$year, ".")
     )
   })
 
@@ -247,8 +327,14 @@ server <- function(input, output, session) {
 
     metric_col <- input$levels_metric
     metric_label <- levels_metric_labels[[metric_col]]
+
     plot_df <- levels_yearly_data() %>%
+      filter(!is.na(.data[[metric_col]])) %>%
       select(state_name, value = all_of(metric_col))
+
+    validate(
+      need(nrow(plot_df) > 0, paste("No map data for year", input$year, "and selected metric"))
+    )
 
     us_map <- map_data("state")
     map_df <- us_map %>%
@@ -270,7 +356,7 @@ server <- function(input, output, session) {
         name = metric_label
       ) +
       labs(
-        title = paste("Levels Map (", levels_effective_year(), ")", sep = ""),
+        title = paste("Levels Map (", input$year, ")", sep = ""),
         subtitle = metric_label,
         x = NULL,
         y = NULL
@@ -283,25 +369,84 @@ server <- function(input, output, session) {
       )
   })
 
-  output$levels_scatter <- renderPlot({
+  levels_scatter_data <- reactive({
+    req(levels_yearly_data())
+    levels_yearly_data() %>%
+      filter(!is.na(gdp_per_job_real_2017), !is.na(qcew_avg_weekly_wage_real_rpp))
+  })
+
+  output$levels_scatter_ui <- renderUI({
+    if (requireNamespace("plotly", quietly = TRUE)) {
+      return(plotly::plotlyOutput("levels_scatter", height = "420px"))
+    }
+    plotOutput("levels_scatter_static", height = "420px")
+  })
+
+  if (requireNamespace("plotly", quietly = TRUE)) {
+    output$levels_scatter <- plotly::renderPlotly({
+      validate(
+        need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
+      )
+
+      df <- levels_scatter_data() %>%
+        mutate(
+          hover_text = sprintf(
+            "State: %s (%s)<br>GDP/job: %s<br>Real weekly wage: %s<br>Wage/productivity ratio: %.4f",
+            to_title(state_name),
+            state_abbr,
+            label_dollar(accuracy = 1)(gdp_per_job_real_2017),
+            label_dollar(accuracy = 1)(qcew_avg_weekly_wage_real_rpp),
+            wage_to_productivity_ratio_real
+          )
+        )
+
+      validate(
+        need(nrow(df) > 0, paste("No levels data for year", input$year))
+      )
+
+      gg <- ggplot(df, aes(
+        x = gdp_per_job_real_2017,
+        y = qcew_avg_weekly_wage_real_rpp,
+        text = hover_text,
+        label = state_abbr
+      )) +
+        geom_point(color = "#2166AC", alpha = 0.8, size = 2.6) +
+        geom_text(size = 2.6, check_overlap = TRUE, vjust = -0.6, color = "#444444") +
+        geom_smooth(method = "lm", se = FALSE, color = "#B2182B", linewidth = 0.9) +
+        scale_x_continuous(labels = label_dollar()) +
+        scale_y_continuous(labels = label_dollar()) +
+        labs(
+          title = paste("State Levels Comparison (", input$year, ")", sep = ""),
+          subtitle = "x: BEA real GDP per job | y: QCEW private average weekly wage (RPP-adjusted)",
+          x = "Real GDP per job (2017 dollars)",
+          y = "Real weekly wage (RPP-adjusted)"
+        ) +
+        theme_minimal(base_size = 12)
+
+      plotly::ggplotly(gg, tooltip = "text") |>
+        plotly::config(displayModeBar = FALSE)
+    })
+  }
+
+  output$levels_scatter_static <- renderPlot({
     validate(
       need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
     )
 
-    df <- levels_yearly_data() %>%
-      filter(!is.na(gdp_per_job_real_2017), !is.na(qcew_avg_weekly_wage_real_rpp))
+    df <- levels_scatter_data()
 
     validate(
       need(nrow(df) > 0, paste("No levels data for year", input$year))
     )
 
-    ggplot(df, aes(x = gdp_per_job_real_2017, y = qcew_avg_weekly_wage_real_rpp)) +
+    ggplot(df, aes(x = gdp_per_job_real_2017, y = qcew_avg_weekly_wage_real_rpp, label = state_abbr)) +
       geom_point(color = "#2166AC", alpha = 0.8, size = 2.6) +
+      geom_text(size = 2.6, check_overlap = TRUE, vjust = -0.6, color = "#444444") +
       geom_smooth(method = "lm", se = FALSE, color = "#B2182B", linewidth = 0.9) +
       scale_x_continuous(labels = label_dollar()) +
       scale_y_continuous(labels = label_dollar()) +
       labs(
-        title = paste("State Levels Comparison (", levels_effective_year(), ")", sep = ""),
+        title = paste("State Levels Comparison (", input$year, ")", sep = ""),
         subtitle = "x: BEA real GDP per job | y: QCEW private average weekly wage (RPP-adjusted)",
         x = "Real GDP per job (2017 dollars)",
         y = "Real weekly wage (RPP-adjusted)"
@@ -314,17 +459,94 @@ server <- function(input, output, session) {
       need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
     )
 
+    metric_col <- input$levels_metric
+    metric_is_dollar <- metric_col %in% c("gdp_per_job_real_2017", "qcew_avg_weekly_wage_real_rpp")
+
     levels_yearly_data() %>%
+      filter(!is.na(.data[[metric_col]])) %>%
       transmute(
         State = to_title(state_name),
+        `Selected Metric` = if (metric_is_dollar) round(.data[[metric_col]], 0) else round(.data[[metric_col]], 4),
         `GDP per Job (Real)` = round(gdp_per_job_real_2017, 0),
         `Weekly Wage (Nominal)` = round(qcew_avg_weekly_wage_nominal, 0),
         `Weekly Wage (Real, RPP)` = round(qcew_avg_weekly_wage_real_rpp, 0),
         `RPP` = round(rpp_all_items_index, 1),
         `Wage/Productivity Ratio` = round(wage_to_productivity_ratio_real, 4)
       ) %>%
-      arrange(desc(`GDP per Job (Real)`))
+      arrange(desc(`Selected Metric`))
   })
+
+  output$download_gap_map <- downloadHandler(
+    filename = function() sprintf("gap_map_%s.csv", input$year),
+    content = function(file) {
+      df <- yearly_data() %>%
+        transmute(
+          state_name,
+          state_abbr,
+          year,
+          labor_productivity_index_2007,
+          hourly_compensation_index_2007,
+          gap_index_2007
+        )
+      write.csv(df, file, row.names = FALSE)
+    }
+  )
+
+  output$download_state_trends <- downloadHandler(
+    filename = function() sprintf("state_trend_%s_%s.csv", input$state, input$year),
+    content = function(file) {
+      df <- panel_data() %>%
+        filter(state_name == input$state) %>%
+        transmute(
+          state_name,
+          state_abbr,
+          year,
+          labor_productivity_index_2007,
+          hourly_compensation_index_2007,
+          gap_index_2007
+        )
+      write.csv(df, file, row.names = FALSE)
+    }
+  )
+
+  output$download_rankings <- downloadHandler(
+    filename = function() sprintf("gap_rankings_%s.csv", input$year),
+    content = function(file) {
+      df <- yearly_data() %>%
+        transmute(
+          state_name,
+          state_abbr,
+          year,
+          labor_productivity_index_2007,
+          hourly_compensation_index_2007,
+          gap_index_2007
+        ) %>%
+        arrange(desc(gap_index_2007))
+      write.csv(df, file, row.names = FALSE)
+    }
+  )
+
+  output$download_levels <- downloadHandler(
+    filename = function() sprintf("levels_%s_%s.csv", input$levels_metric, input$year),
+    content = function(file) {
+      metric_col <- input$levels_metric
+      df <- levels_yearly_data() %>%
+        filter(!is.na(.data[[metric_col]])) %>%
+        transmute(
+          state_name,
+          state_abbr,
+          year,
+          selected_metric = metric_col,
+          selected_metric_value = .data[[metric_col]],
+          gdp_per_job_real_2017,
+          qcew_avg_weekly_wage_nominal,
+          qcew_avg_weekly_wage_real_rpp,
+          rpp_all_items_index,
+          wage_to_productivity_ratio_real
+        )
+      write.csv(df, file, row.names = FALSE)
+    }
+  )
 }
 
 shinyApp(ui, server)
