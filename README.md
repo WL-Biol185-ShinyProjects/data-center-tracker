@@ -151,13 +151,6 @@ Current data snapshot in this repo (as checked on 2026-02-18):
 2. Explore `Map View`, `State Comparison`, `Gap Rankings`, and `Levels Comparison`.
 3. Download the filtered CSV from each tab’s download button.
 
-## Quality and Trust Notes
-
-- No AI-generated synthetic data is used in analysis outputs.
-- Data values are sourced from BLS/BEA public datasets and transformed by visible scripts in this repo.
-- The app does not fabricate missing years. If a year/metric combination is unavailable, it is not offered in the selector.
-- A data-freshness banner in the app reports observed coverage windows by metric family.
-
 ## Limitations (Important)
 
 - Growth panel series IDs are discovered by scraping FRED search results; if FRED page structure changes, discovery may need maintenance.
