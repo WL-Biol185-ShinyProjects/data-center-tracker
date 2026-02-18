@@ -1,4 +1,4 @@
-source(file.path("R", "helpers.R"))
+source(testthat::test_path("..", "..", "R", "helpers.R"))
 
 testthat::test_that("extract_series_links parses state links and ignores non-states", {
   html <- paste(
