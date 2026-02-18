@@ -13,6 +13,14 @@ load_panel_data <- function() {
   read.csv(data_path, stringsAsFactors = FALSE)
 }
 
+load_levels_data <- function() {
+  data_path <- file.path("data", "state_levels_panel.csv")
+  if (!file.exists(data_path)) {
+    return(NULL)
+  }
+  read.csv(data_path, stringsAsFactors = FALSE)
+}
+
 to_title <- function(x) {
   tools::toTitleCase(x)
 }
@@ -33,6 +41,12 @@ ui <- fluidPage(
         tabPanel("Map View", plotOutput("gap_map", height = "550px")),
         tabPanel("State Comparison", plotOutput("state_trends", height = "420px")),
         tabPanel("Gap Rankings", tableOutput("rank_table")),
+        tabPanel(
+          "Levels Comparison",
+          p("Cross-sectional levels view: BEA real GDP per job vs QCEW private-sector wages (RPP-adjusted)."),
+          plotOutput("levels_scatter", height = "420px"),
+          tableOutput("levels_rank_table")
+        ),
         tabPanel(
           "About",
           h4("Methods"),
@@ -55,6 +69,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   panel_data <- reactiveVal(load_panel_data())
+  levels_data <- reactiveVal(load_levels_data())
 
   observe({
     df <- panel_data()
@@ -171,6 +186,53 @@ server <- function(input, output, session) {
         `Gap` = round(gap_index_2007, 1)
       ) %>%
       arrange(desc(Gap))
+  })
+
+  levels_yearly_data <- reactive({
+    req(levels_data(), input$year)
+    levels_data() %>% filter(year == input$year)
+  })
+
+  output$levels_scatter <- renderPlot({
+    validate(
+      need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
+    )
+
+    df <- levels_yearly_data() %>%
+      filter(!is.na(gdp_per_job_real_2017), !is.na(qcew_avg_weekly_wage_real_rpp))
+
+    validate(
+      need(nrow(df) > 0, paste("No levels data for year", input$year))
+    )
+
+    ggplot(df, aes(x = gdp_per_job_real_2017, y = qcew_avg_weekly_wage_real_rpp)) +
+      geom_point(color = "#2166AC", alpha = 0.8, size = 2.6) +
+      geom_smooth(method = "lm", se = FALSE, color = "#B2182B", linewidth = 0.9) +
+      scale_x_continuous(labels = label_dollar()) +
+      scale_y_continuous(labels = label_dollar()) +
+      labs(
+        title = paste("State Levels Comparison (", input$year, ")", sep = ""),
+        subtitle = "x: BEA real GDP per job | y: QCEW private average weekly wage (RPP-adjusted)",
+        x = "Real GDP per job (2017 dollars)",
+        y = "Real weekly wage (RPP-adjusted)"
+      ) +
+      theme_minimal(base_size = 12)
+  })
+
+  output$levels_rank_table <- renderTable({
+    validate(
+      need(!is.null(levels_data()), "Run `Rscript data-raw/run_levels_all.R` to build levels data.")
+    )
+
+    levels_yearly_data() %>%
+      transmute(
+        State = to_title(state_name),
+        `GDP per Job (Real)` = round(gdp_per_job_real_2017, 0),
+        `Weekly Wage (Nominal)` = round(qcew_avg_weekly_wage_nominal, 0),
+        `Weekly Wage (Real, RPP)` = round(qcew_avg_weekly_wage_real_rpp, 0),
+        `RPP` = round(rpp_all_items_index, 1)
+      ) %>%
+      arrange(desc(`GDP per Job (Real)`))
   })
 }
 

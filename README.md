@@ -68,13 +68,19 @@ install.packages(c("shiny", "dplyr", "tidyr", "ggplot2", "maps", "scales", "test
 Rscript data-raw/run_all.R
 ```
 
-3. Run tests:
+3. Build levels outputs (BEA + QCEW + RPP):
+
+```bash
+Rscript data-raw/run_levels_all.R
+```
+
+4. Run tests:
 
 ```bash
 Rscript -e 'testthat::test_dir("tests/testthat")'
 ```
 
-4. Run the Shiny app:
+5. Run the Shiny app:
 
 ```bash
 Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
@@ -91,3 +97,6 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 - `data/series_catalog.csv` - discovered state-to-series mapping.
 - `data/state_metrics_long.csv` - tidy long data by state, year, and metric.
 - `data/state_panel.csv` - app-ready wide panel with gap metric.
+- `data/qcew_state_private_wages.csv` - state private-sector QCEW wage inputs.
+- `data/state_levels_panel.csv` - levels panel for GDP/job vs wages.
+- `data/state_levels_long.csv` - tidy long version of levels metrics.

@@ -8,6 +8,43 @@ state_lookup <- function() {
   )
 }
 
+state_fips_lookup <- function() {
+  data.frame(
+    state_abbr = c(
+      "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL",
+      "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",
+      "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
+      "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI",
+      "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+    ),
+    state_fips2 = c(
+      "01", "02", "04", "05", "06", "08", "09", "10", "11", "12",
+      "13", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+      "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
+      "34", "35", "36", "37", "38", "39", "40", "41", "42", "44",
+      "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56"
+    ),
+    stringsAsFactors = FALSE
+  ) |>
+    merge(state_lookup(), by = "state_abbr")
+}
+
+download_if_missing <- function(url, dest_path) {
+  if (file.exists(dest_path)) {
+    return(invisible(dest_path))
+  }
+  dir.create(dirname(dest_path), showWarnings = FALSE, recursive = TRUE)
+  utils::download.file(url, destfile = dest_path, mode = "wb", quiet = TRUE)
+  invisible(dest_path)
+}
+
+parse_numeric_safe <- function(x) {
+  x <- gsub(",", "", x, fixed = TRUE)
+  x <- gsub("(NA)", "", x, fixed = TRUE)
+  x <- trimws(x)
+  suppressWarnings(as.numeric(x))
+}
+
 download_text <- function(url) {
   connection <- url(url, open = "rb")
   on.exit(close(connection), add = TRUE)

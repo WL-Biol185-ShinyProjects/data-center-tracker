@@ -22,3 +22,9 @@ testthat::test_that("rebase_values returns 100 for the base year", {
   testthat::expect_equal(rebased[2], 100)
   testthat::expect_equal(round(rebased[3], 1), 120)
 })
+
+testthat::test_that("state_fips_lookup includes 51 state/DC rows", {
+  out <- state_fips_lookup()
+  testthat::expect_equal(nrow(out), 51)
+  testthat::expect_true(all(c("state_name", "state_abbr", "state_fips2") %in% names(out)))
+})
