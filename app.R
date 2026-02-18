@@ -2,7 +2,6 @@ library(shiny)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(maps)
 library(scales)
 
 load_panel_data <- function() {
@@ -41,6 +40,13 @@ levels_metric_labels <- c(
   qcew_avg_weekly_wage_real_rpp = "Weekly Wage (Real, RPP-adjusted)",
   wage_to_productivity_ratio_real = "Wage-to-Productivity Ratio"
 )
+
+load_us_map <- function() {
+  if (!requireNamespace("maps", quietly = TRUE)) {
+    return(NULL)
+  }
+  ggplot2::map_data("state")
+}
 
 ui <- fluidPage(
   titlePanel("Productivity vs Wages Atlas"),
@@ -216,8 +222,11 @@ server <- function(input, output, session) {
 
   output$gap_map <- renderPlot({
     req(yearly_data())
+    us_map <- load_us_map()
+    validate(
+      need(!is.null(us_map), "Map dependency missing: install package `maps` to render map views.")
+    )
 
-    us_map <- map_data("state")
     map_df <- us_map %>%
       left_join(
         yearly_data() %>% select(state_name, gap_index_2007),
@@ -336,7 +345,11 @@ server <- function(input, output, session) {
       need(nrow(plot_df) > 0, paste("No map data for year", input$year, "and selected metric"))
     )
 
-    us_map <- map_data("state")
+    us_map <- load_us_map()
+    validate(
+      need(!is.null(us_map), "Map dependency missing: install package `maps` to render map views.")
+    )
+
     map_df <- us_map %>%
       left_join(plot_df, by = c("region" = "state_name"))
 
