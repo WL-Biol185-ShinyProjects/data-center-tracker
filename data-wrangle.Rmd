@@ -4,6 +4,117 @@ output: html_document
 ---
 
 ```{r}
+library(rvest)
+library(xml2)
+
+# ── 1. Load local HTML file ────────────────────────────────────────────────────
+html_path <- "Bureau_of_Labor_Statistics_Data.html"   # adjust path as needed
+page <- read_html(html_path)
+
+# ── 2. Parse all catalog (metadata) tables ─────────────────────────────────────
+# Each catalog table has id="catalog0", "catalog1", … and contains
+# <th> key / <td> value row pairs.
+
+catalog_nodes <- html_nodes(page, "table.catalog")
+
+parse_catalog <- function(node) {
+  keys   <- html_text(html_nodes(node, "th.catalog"), trim = TRUE)
+  values <- html_text(html_nodes(node, "td.catalog"), trim = TRUE)
+  # Remove trailing colons from keys if present
+  keys <- sub(":$", "", keys)
+  # Make keys valid R names
+  keys_clean <- make.names(keys)
+  meta <- as.list(setNames(values, keys_clean))
+  # Also store the original catalog id
+  meta[["catalog_id"]] <- xml_attr(node, "id")
+  meta
+}
+
+catalogs <- lapply(catalog_nodes, parse_catalog)
+# Name list by catalog id for easy lookup
+names(catalogs) <- sapply(catalogs, `[[`, "catalog_id")
+
+# ── 3. Parse all data tables and attach metadata ───────────────────────────────
+# Each data table has class="regular-data" and aria-describedby="catalogN",
+# which directly references its matching catalog table.
+
+data_nodes <- html_nodes(page, "table.regular-data")
+
+parse_data_table <- function(node) {
+  # -- Parse the table into a data frame --
+  df <- html_table(node, header = TRUE, fill = TRUE)
+
+  # Clean column names
+  names(df) <- trimws(names(df))
+
+  # Strip provisional "(P)" markers and convert values to numeric where possible
+  df[] <- lapply(df, function(col) {
+    if (is.character(col)) {
+      cleaned <- gsub("\\(P\\)", "", col)   # remove (P) suffix
+      cleaned <- trimws(cleaned)
+      cleaned[cleaned == "\u00a0" | cleaned == ""] <- NA  # &nbsp; -> NA
+      # Try numeric conversion; keep as character if it fails
+      num <- suppressWarnings(as.numeric(gsub(",", "", cleaned)))
+      if (all(is.na(num) == is.na(cleaned))) num else cleaned
+    } else col
+  })
+
+  # -- Find the matching catalog via aria-describedby --
+  catalog_ref <- xml_attr(node, "aria-describedby")   # e.g. "catalog0"
+  meta        <- catalogs[[catalog_ref]]               # named list of metadata
+
+  # -- Attach metadata as attributes --
+  for (nm in names(meta)) {
+    attr(df, nm) <- meta[[nm]]
+  }
+  attr(df, "table_id")    <- xml_attr(node, "id")     # e.g. "table0"
+  attr(df, "source_html") <- html_path
+
+  df
+}
+
+dataframes_list <- lapply(data_nodes, parse_data_table)
+
+# Name the list by Series Id for convenient access
+series_ids <- sapply(dataframes_list, function(df) attr(df, "Series.Id"))
+names(dataframes_list) <- series_ids
+
+# ── 4. Quick sanity check ──────────────────────────────────────────────────────
+cat(sprintf("Loaded %d data tables.\n\n", length(dataframes_list)))
+
+# Show metadata attributes for the first table
+first <- dataframes_list[[1]]
+cat("=== Example: first data frame ===\n")
+cat("Series Id   :", attr(first, "Series.Id"),    "\n")
+cat("Series Title:", attr(first, "Series.Title"), "\n")
+cat("State       :", attr(first, "State"),         "\n")
+cat("Area        :", attr(first, "Area"),           "\n")
+cat("Industry    :", attr(first, "Industry"),       "\n")
+cat("Owner       :", attr(first, "Owner"),          "\n")
+cat("Size        :", attr(first, "Size"),           "\n")
+cat("Type        :", attr(first, "Type"),           "\n")
+cat("Dimensions  :", nrow(first), "rows x", ncol(first), "cols\n\n")
+print(head(first))
+
+# ── 5. Accessing the list ──────────────────────────────────────────────────────
+# By position:
+#   dataframes_list[[1]]
+#
+# By Series Id:
+#   dataframes_list[["ENU0100010010"]]
+#
+# All attributes for a given df:
+#   attributes(dataframes_list[[1]])
+#
+# Extract a specific attribute across all dfs:
+#   sapply(dataframes_list, function(df) attr(df, "State"))
+#
+# Filter to a specific state:
+#   al_list <- Filter(function(df) attr(df, "State") == "Alabama", dataframes_list)
+```
+
+```{r}
 
 ```
+
 
