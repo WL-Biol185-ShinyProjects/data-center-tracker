@@ -20,6 +20,18 @@ How much have wages and productivity diverged over time by state, and which stat
 - State Wages: `[STATE]AVGWAGES`
 - CPI (for inflation adjustment)
 
+## Source Links (Canonical)
+
+- BLS Productivity by State: https://www.bls.gov/lpc/state-productivity.htm
+- BLS QCEW: https://www.bls.gov/cew/
+- BLS OEWS: https://www.bls.gov/oes/
+- BEA GDP by State: https://www.bea.gov/data/gdp/gdp-state
+- BEA Employment by State: https://www.bea.gov/data/employment/employment-state
+- BEA Regional Price Parities: https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area
+- BLS CES State and Metro (SAE): https://www.bls.gov/sae/
+
+Note: ETL v1 currently fetches BLS state productivity-family series through FRED CSV endpoints for reliable scripted access.
+
 ## Planned Outputs
 
 - Interactive map of state-level productivity-wage gap
@@ -44,14 +56,25 @@ How much have wages and productivity diverged over time by state, and which stat
 
 ## Quick Start
 
-1. Install required R packages (to be finalized by team).
+1. Install required R packages:
+
+```r
+install.packages(c("shiny", "dplyr", "tidyr", "ggplot2", "maps", "scales", "testthat"))
+```
+
 2. Build data outputs:
 
 ```bash
 Rscript data-raw/run_all.R
 ```
 
-3. Run the Shiny app:
+3. Run tests:
+
+```bash
+Rscript -e 'testthat::test_dir("tests/testthat")'
+```
+
+4. Run the Shiny app:
 
 ```bash
 Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
@@ -60,5 +83,11 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 ## Current Status
 
 - Repository has been repurposed from the prior Data Center concept.
-- Starter scaffold and placeholders are in place.
-- Next step is implementing ETL and first visual prototype.
+- ETL now pulls state series for labor productivity, hourly compensation, and unit labor costs.
+- App MVP includes map view, state trend view, rankings table, and methods tab.
+
+## Data Outputs
+
+- `data/series_catalog.csv` - discovered state-to-series mapping.
+- `data/state_metrics_long.csv` - tidy long data by state, year, and metric.
+- `data/state_panel.csv` - app-ready wide panel with gap metric.
