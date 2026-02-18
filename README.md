@@ -145,6 +145,54 @@ Current data snapshot in this repo (as checked on 2026-02-18):
 - `state_panel.csv`: 918 rows, years 2007-2024, 51 geographies (50 states + DC)
 - `state_levels_panel.csv`: 867 rows, years 2008-2024, 51 geographies (50 states + DC)
 
+## Using Posit Workbench (WLU)
+
+These steps are for teammates using:
+https://positworkbench.wlu.edu
+
+### First time setup (one-time)
+
+1. Log in to Posit Workbench and open an RStudio session.
+2. Open the `Terminal` tab in RStudio.
+3. Clone the project and move into it:
+
+```bash
+git clone https://github.com/WL-Biol185-ShinyProjects/data-center-tracker.git
+cd data-center-tracker
+```
+
+4. Install required R packages once:
+
+```bash
+Rscript -e 'install.packages(c("shiny","dplyr","tidyr","ggplot2","maps","scales","plotly","testthat"), repos="https://cloud.r-project.org")'
+```
+
+### Daily workflow (each time you work)
+
+1. Open `Terminal` in RStudio.
+2. Go to the project folder and pull latest changes:
+
+```bash
+cd ~/data-center-tracker
+git pull origin main
+```
+
+3. Start the app:
+
+```bash
+Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
+```
+
+4. Open the app from the RStudio `Viewer` pane (or the URL shown in console).
+5. Stop the app when done with `Ctrl + C` in the terminal.
+
+### If something does not run
+
+- If you see `there is no package called ...`, run the one-time package install command again.
+- If `git pull` says there are local changes you do not want, ask a teammate before continuing.
+- If local run is blocked, use the deployed app directly:
+  https://jacksonmaroon.shinyapps.io/productivity-vs-wages-atlas/
+
 ## App Use (3 Steps)
 
 1. Pick `Year` and `State` in the sidebar.
