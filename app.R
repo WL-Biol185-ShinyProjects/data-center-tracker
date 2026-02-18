@@ -40,6 +40,7 @@ levels_metric_labels <- c(
   qcew_avg_weekly_wage_real_rpp = "Weekly Wage (Real, RPP-adjusted)",
   wage_to_productivity_ratio_real = "Wage-to-Productivity Ratio"
 )
+levels_metric_choices <- stats::setNames(names(levels_metric_labels), levels_metric_labels)
 
 load_us_map <- function() {
   if (!requireNamespace("maps", quietly = TRUE)) {
@@ -56,7 +57,7 @@ ui <- fluidPage(
       p("Private nonfarm, state-level annual metrics from the BLS productivity family."),
       selectInput("year", "Year", choices = NULL),
       selectInput("state", "State", choices = NULL),
-      selectInput("levels_metric", "Levels Map Metric", choices = levels_metric_labels)
+      selectInput("levels_metric", "Levels Map Metric", choices = levels_metric_choices)
     ),
     mainPanel(
       width = 9,
