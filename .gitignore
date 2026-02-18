@@ -49,3 +49,6 @@ po/*~
 rsconnect/
 
 *.Rproj*
+
+# Local ETL cache artifacts
+data-raw/cache/
