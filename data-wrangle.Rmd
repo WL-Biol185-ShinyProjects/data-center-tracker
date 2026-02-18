@@ -117,6 +117,9 @@ print(head(first))
 # Function to clean 
 cleanupFunct <- function(X){
 # BODY
+  
+  # TO DO: WRITE GATHER 
+  # 
   gather
   
   as.numeric(X$c)
