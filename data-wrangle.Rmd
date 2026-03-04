@@ -114,39 +114,23 @@ print(head(first))
 ```
 
 ```{r}
-# Function to clean 
-cleanupFunct <- function(X){
-# BODY
+# CLEANUP FUNCTION FOR ALABAMA
+  # psudeocode
   
-  # TO DO: WRITE GATHER 
-  # 
-  gather
-  
-  as.numeric(X$c)
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-}
-  
-  
-  
-  
-# dataframes_list cleanup
-employment <- lapply(dataframes_list, cleanupFunct() {
-  
-  if (attr(alabama, "All Employees in Total Covered Total, all industries for All establishment sizes in Alabama -- Statewide, NSA") == "All Employees in Total Covered Total, all industries for All establishment sizes in Alabama -- Statewide, NSA") {
-  } else { 
-    NA }  
-  
-})
 
+employed <- lapply(dataframes_list, function(table){
+  if (substring(attr(table, "Series.Title"), 1 , 74) == "All Employees in Total Covered Total, all industries for All establishment" ){
+     table$state <- attr(table, "State")
+    
+    }else{
+      NA
+   }
+  }
+)
+
+employed <- employed[!is.na(employed)]
+
+all_states_employed <- do.call(rbind, employed)
 
 ```
 
