@@ -137,7 +137,11 @@ state_levels_panel <- state_key %>%
   ) %>%
   ungroup() %>%
   mutate(
-    wage_to_productivity_ratio_real = qcew_avg_weekly_wage_real_rpp / gdp_per_job_real_2017
+    # Ratio should be dimensionally consistent: annual compensation / annual output per job.
+    wage_to_productivity_ratio_real = compute_compensation_to_productivity_ratio(
+      annual_pay_real = qcew_avg_annual_pay_real_rpp,
+      gdp_per_job_real = gdp_per_job_real_2017
+    )
   ) %>%
   arrange(year, state_name)
 

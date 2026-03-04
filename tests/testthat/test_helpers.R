@@ -23,8 +23,30 @@ testthat::test_that("rebase_values returns 100 for the base year", {
   testthat::expect_equal(round(rebased[3], 1), 120)
 })
 
+testthat::test_that("rebase_values falls back to first non-NA when base year is missing", {
+  values <- c(NA, 50, 60)
+  years <- c(2007, 2008, 2009)
+  rebased <- rebase_values(values, years, base_year = 2007)
+
+  testthat::expect_true(is.na(rebased[1]))
+  testthat::expect_equal(rebased[2], 100)
+  testthat::expect_equal(round(rebased[3], 1), 120)
+})
+
 testthat::test_that("state_fips_lookup includes 51 state/DC rows", {
   out <- state_fips_lookup()
   testthat::expect_equal(nrow(out), 51)
   testthat::expect_true(all(c("state_name", "state_abbr", "state_fips2") %in% names(out)))
+})
+
+testthat::test_that("compute_compensation_to_productivity_ratio uses annual pay and handles invalid denominators", {
+  annual_pay <- c(75000, 50000, NA, 40000)
+  gdp_per_job <- c(125000, 0, 100000, NA)
+
+  out <- compute_compensation_to_productivity_ratio(annual_pay, gdp_per_job)
+
+  testthat::expect_equal(out[1], 0.6)
+  testthat::expect_true(is.na(out[2]))
+  testthat::expect_true(is.na(out[3]))
+  testthat::expect_true(is.na(out[4]))
 })

@@ -133,12 +133,18 @@ rebase_values <- function(values, years, base_year = 2007) {
   }
 
   base_idx <- which(years == base_year)[1]
-  if (is.na(base_idx)) {
+  if (is.na(base_idx) || is.na(values[base_idx])) {
     base_idx <- which(!is.na(values))[1]
   }
-  if (is.na(base_idx) || values[base_idx] == 0) {
+  if (is.na(base_idx) || is.na(values[base_idx]) || values[base_idx] == 0) {
     return(rep(NA_real_, length(values)))
   }
 
   (values / values[base_idx]) * 100
+}
+
+compute_compensation_to_productivity_ratio <- function(annual_pay_real, gdp_per_job_real) {
+  ratio <- annual_pay_real / gdp_per_job_real
+  ratio[is.na(annual_pay_real) | is.na(gdp_per_job_real) | gdp_per_job_real <= 0] <- NA_real_
+  ratio
 }

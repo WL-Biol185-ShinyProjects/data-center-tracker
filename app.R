@@ -17,7 +17,21 @@ load_levels_data <- function() {
   if (!file.exists(data_path)) {
     return(NULL)
   }
-  read.csv(data_path, stringsAsFactors = FALSE)
+  df <- read.csv(data_path, stringsAsFactors = FALSE)
+
+  # Guard against stale snapshots: compute ratio as annual real pay / real GDP per job.
+  if (all(c("qcew_avg_annual_pay_real_rpp", "gdp_per_job_real_2017") %in% names(df))) {
+    df <- df %>%
+      mutate(
+        wage_to_productivity_ratio_real = ifelse(
+          is.na(qcew_avg_annual_pay_real_rpp) | is.na(gdp_per_job_real_2017) | gdp_per_job_real_2017 <= 0,
+          NA_real_,
+          qcew_avg_annual_pay_real_rpp / gdp_per_job_real_2017
+        )
+      )
+  }
+
+  df
 }
 
 to_title <- function(x) {
@@ -38,7 +52,7 @@ range_label <- function(values) {
 levels_metric_labels <- c(
   gdp_per_job_real_2017 = "GDP per Job (Real, 2017 dollars)",
   qcew_avg_weekly_wage_real_rpp = "Weekly Wage (Real, RPP-adjusted)",
-  wage_to_productivity_ratio_real = "Wage-to-Productivity Ratio"
+  wage_to_productivity_ratio_real = "Compensation-to-Productivity Ratio (Annual Real Pay / Real GDP per Job)"
 )
 levels_metric_choices <- stats::setNames(names(levels_metric_labels), levels_metric_labels)
 
@@ -57,6 +71,15 @@ ui <- fluidPage(
       p("Private nonfarm, state-level annual metrics from the BLS productivity family."),
       selectInput("year", "Year", choices = NULL),
       selectInput("state", "State", choices = NULL),
+      selectInput(
+        "growth_wage_basis",
+        "Growth Wage Basis",
+        choices = c(
+          "Real (GDP deflator adjusted)" = "real",
+          "Nominal (not inflation-adjusted)" = "nominal"
+        ),
+        selected = "real"
+      ),
       selectInput("levels_metric", "Levels Map Metric", choices = levels_metric_choices)
     ),
     mainPanel(
@@ -97,9 +120,17 @@ ui <- fluidPage(
           "About",
           h4("Methods"),
           p("This app compares labor productivity and hourly compensation across states."),
-          p("All trend lines are rebased to 2007 = 100 for readability."),
-          p("Gap metric = labor productivity index minus hourly compensation index."),
+          p("Growth trends are rebased to 2007 = 100 for readability."),
+          p("Growth tabs default to real hourly compensation using a national GDP deflator. Use the sidebar toggle to switch to nominal."),
+          p("Gap metric = labor productivity index minus hourly compensation index (real by default)."),
+          p("Levels ratio metric = annual private-sector real pay (QCEW + RPP) divided by real GDP per job (BEA)."),
           p("Interpretation note: these are descriptive comparisons, not causal claims."),
+          h5("Important Comparability Notes"),
+          tags$ul(
+            tags$li("Levels panel combines BEA total-economy GDP/jobs with QCEW private-sector wages."),
+            tags$li("Real wages use BEA RPP (spatial cost adjustment), while GDP per job is in chained 2017 dollars (time deflation)."),
+            tags$li("Treat levels comparisons as descriptive cross-state signals, not a structural labor-share estimate.")
+          ),
           tags$ul(
             tags$li(tags$a(href = "https://www.bls.gov/lpc/state-productivity.htm", target = "_blank", "BLS Productivity by State")),
             tags$li(tags$a(href = "https://www.bls.gov/cew/", target = "_blank", "BLS QCEW")),
@@ -155,6 +186,23 @@ server <- function(input, output, session) {
     updateSelectInput(session, "year", choices = years, selected = selected_year)
   })
 
+  growth_metric_config <- reactive({
+    df <- panel_data()
+    req(!is.null(df), nrow(df) > 0)
+
+    has_real <- all(c("hourly_compensation_real_index_2007", "gap_real_index_2007") %in% names(df))
+    has_nominal_gap <- "gap_nominal_index_2007" %in% names(df)
+    use_real <- identical(input$growth_wage_basis, "real") && has_real
+
+    list(
+      mode = if (use_real) "real" else "nominal",
+      comp_col = if (use_real) "hourly_compensation_real_index_2007" else "hourly_compensation_index_2007",
+      gap_col = if (use_real) "gap_real_index_2007" else if (has_nominal_gap) "gap_nominal_index_2007" else "gap_index_2007",
+      comp_label = if (use_real) "Hourly Compensation (Real)" else "Hourly Compensation (Nominal)",
+      gap_label = if (use_real) "Real Gap" else "Nominal Gap"
+    )
+  })
+
   output$missing_data_notice <- renderUI({
     if (!is.null(panel_data()) && !is.null(levels_data())) {
       return(NULL)
@@ -179,6 +227,7 @@ server <- function(input, output, session) {
     if (is.null(panel_data()) && is.null(levels_data())) {
       return(NULL)
     }
+    growth_cfg <- growth_metric_config()
 
     growth_span <- if (!is.null(panel_data())) {
       range_label(panel_data()$year)
@@ -208,6 +257,7 @@ server <- function(input, output, session) {
       class = "alert alert-info",
       tags$strong("Data Freshness"),
       tags$ul(
+        tags$li(paste("Growth wage display mode:", growth_cfg$mode)),
         tags$li(paste("Growth panel (BLS productivity-family):", growth_span)),
         tags$li(paste("Levels GDP/job (BEA):", levels_span_gdp)),
         tags$li(paste("Levels weekly wage nominal (QCEW):", levels_span_qcew_nominal)),
@@ -223,6 +273,7 @@ server <- function(input, output, session) {
 
   output$gap_map <- renderPlot({
     req(yearly_data())
+    growth_cfg <- growth_metric_config()
     us_map <- load_us_map()
     validate(
       need(!is.null(us_map), "Map dependency missing: install package `maps` to render map views.")
@@ -230,11 +281,12 @@ server <- function(input, output, session) {
 
     map_df <- us_map %>%
       left_join(
-        yearly_data() %>% select(state_name, gap_index_2007),
+        yearly_data() %>%
+          transmute(state_name, gap_value = .data[[growth_cfg$gap_col]]),
         by = c("region" = "state_name")
       )
 
-    ggplot(map_df, aes(long, lat, group = group, fill = gap_index_2007)) +
+    ggplot(map_df, aes(long, lat, group = group, fill = gap_value)) +
       geom_polygon(color = "white", linewidth = 0.15) +
       coord_fixed(1.3) +
       scale_fill_gradient2(
@@ -248,7 +300,10 @@ server <- function(input, output, session) {
       ) +
       labs(
         title = paste("Productivity-Compensation Gap by State (", input$year, ")", sep = ""),
-        subtitle = "Gap = labor productivity index (2007 = 100) minus hourly compensation index (2007 = 100)",
+        subtitle = paste0(
+          growth_cfg$gap_label,
+          " = labor productivity index (2007 = 100) minus compensation index (2007 = 100)"
+        ),
         x = NULL,
         y = NULL
       ) +
@@ -262,6 +317,7 @@ server <- function(input, output, session) {
 
   output$state_trends <- renderPlot({
     req(panel_data(), input$state)
+    growth_cfg <- growth_metric_config()
 
     df <- panel_data() %>%
       filter(state_name == input$state) %>%
@@ -269,7 +325,7 @@ server <- function(input, output, session) {
       select(
         year,
         labor_productivity_index_2007,
-        hourly_compensation_index_2007
+        compensation_index = all_of(growth_cfg$comp_col)
       ) %>%
       pivot_longer(
         cols = -year,
@@ -280,14 +336,16 @@ server <- function(input, output, session) {
         metric = recode(
           metric,
           labor_productivity_index_2007 = "Labor Productivity",
-          hourly_compensation_index_2007 = "Hourly Compensation"
+          compensation_index = growth_cfg$comp_label
         )
       )
 
     ggplot(df, aes(x = year, y = value, color = metric)) +
       geom_line(linewidth = 1.1) +
       geom_point(size = 1.8) +
-      scale_color_manual(values = c("Labor Productivity" = "#2166AC", "Hourly Compensation" = "#B2182B")) +
+      scale_color_manual(
+        values = stats::setNames(c("#2166AC", "#B2182B"), c("Labor Productivity", growth_cfg$comp_label))
+      ) +
       labs(
         title = paste("State Trend:", to_title(input$state)),
         subtitle = "Both series rebased to 2007 = 100",
@@ -300,14 +358,19 @@ server <- function(input, output, session) {
 
   output$rank_table <- renderTable({
     req(yearly_data())
-    yearly_data() %>%
+    growth_cfg <- growth_metric_config()
+
+    out <- yearly_data() %>%
       transmute(
         State = to_title(state_name),
         `Productivity (2007=100)` = round(labor_productivity_index_2007, 1),
-        `Compensation (2007=100)` = round(hourly_compensation_index_2007, 1),
-        `Gap` = round(gap_index_2007, 1)
+        Compensation = round(.data[[growth_cfg$comp_col]], 1),
+        Gap = round(.data[[growth_cfg$gap_col]], 1)
       ) %>%
       arrange(desc(Gap))
+
+    names(out)[3] <- paste0(growth_cfg$comp_label, " (2007=100)")
+    out
   })
 
   levels_yearly_data <- reactive({
@@ -356,6 +419,8 @@ server <- function(input, output, session) {
 
     value_labels <- if (metric_col %in% c("gdp_per_job_real_2017", "qcew_avg_weekly_wage_real_rpp")) {
       label_dollar(accuracy = 1)
+    } else if (metric_col == "wage_to_productivity_ratio_real") {
+      label_percent(accuracy = 0.1)
     } else {
       label_number(accuracy = 0.001)
     }
@@ -405,7 +470,7 @@ server <- function(input, output, session) {
       df <- levels_scatter_data() %>%
         mutate(
           hover_text = sprintf(
-            "State: %s (%s)<br>GDP/job: %s<br>Real weekly wage: %s<br>Wage/productivity ratio: %.4f",
+            "State: %s (%s)<br>GDP/job: %s<br>Real weekly wage: %s<br>Compensation/productivity ratio (annual): %.3f",
             to_title(state_name),
             state_abbr,
             label_dollar(accuracy = 1)(gdp_per_job_real_2017),
@@ -485,14 +550,15 @@ server <- function(input, output, session) {
         `Weekly Wage (Nominal)` = round(qcew_avg_weekly_wage_nominal, 0),
         `Weekly Wage (Real, RPP)` = round(qcew_avg_weekly_wage_real_rpp, 0),
         `RPP` = round(rpp_all_items_index, 1),
-        `Wage/Productivity Ratio` = round(wage_to_productivity_ratio_real, 4)
+        `Compensation/Productivity Ratio (Annual)` = round(wage_to_productivity_ratio_real, 4)
       ) %>%
       arrange(desc(`Selected Metric`))
   })
 
   output$download_gap_map <- downloadHandler(
-    filename = function() sprintf("gap_map_%s.csv", input$year),
+    filename = function() sprintf("gap_map_%s_%s.csv", input$growth_wage_basis, input$year),
     content = function(file) {
+      growth_cfg <- growth_metric_config()
       df <- yearly_data() %>%
         transmute(
           state_name,
@@ -500,15 +566,25 @@ server <- function(input, output, session) {
           year,
           labor_productivity_index_2007,
           hourly_compensation_index_2007,
-          gap_index_2007
+          hourly_compensation_real_index_2007 = if ("hourly_compensation_real_index_2007" %in% names(.)) {
+            hourly_compensation_real_index_2007
+          } else {
+            NA_real_
+          },
+          gap_nominal_index_2007 = if ("gap_nominal_index_2007" %in% names(.)) gap_nominal_index_2007 else gap_index_2007,
+          gap_real_index_2007 = if ("gap_real_index_2007" %in% names(.)) gap_real_index_2007 else gap_index_2007,
+          selected_gap_index_2007 = .data[[growth_cfg$gap_col]],
+          selected_compensation_index_2007 = .data[[growth_cfg$comp_col]],
+          selected_mode = growth_cfg$mode
         )
       write.csv(df, file, row.names = FALSE)
     }
   )
 
   output$download_state_trends <- downloadHandler(
-    filename = function() sprintf("state_trend_%s_%s.csv", input$state, input$year),
+    filename = function() sprintf("state_trend_%s_%s_%s.csv", input$state, input$growth_wage_basis, input$year),
     content = function(file) {
+      growth_cfg <- growth_metric_config()
       df <- panel_data() %>%
         filter(state_name == input$state) %>%
         transmute(
@@ -517,15 +593,25 @@ server <- function(input, output, session) {
           year,
           labor_productivity_index_2007,
           hourly_compensation_index_2007,
-          gap_index_2007
+          hourly_compensation_real_index_2007 = if ("hourly_compensation_real_index_2007" %in% names(.)) {
+            hourly_compensation_real_index_2007
+          } else {
+            NA_real_
+          },
+          gap_nominal_index_2007 = if ("gap_nominal_index_2007" %in% names(.)) gap_nominal_index_2007 else gap_index_2007,
+          gap_real_index_2007 = if ("gap_real_index_2007" %in% names(.)) gap_real_index_2007 else gap_index_2007,
+          selected_gap_index_2007 = .data[[growth_cfg$gap_col]],
+          selected_compensation_index_2007 = .data[[growth_cfg$comp_col]],
+          selected_mode = growth_cfg$mode
         )
       write.csv(df, file, row.names = FALSE)
     }
   )
 
   output$download_rankings <- downloadHandler(
-    filename = function() sprintf("gap_rankings_%s.csv", input$year),
+    filename = function() sprintf("gap_rankings_%s_%s.csv", input$growth_wage_basis, input$year),
     content = function(file) {
+      growth_cfg <- growth_metric_config()
       df <- yearly_data() %>%
         transmute(
           state_name,
@@ -533,9 +619,18 @@ server <- function(input, output, session) {
           year,
           labor_productivity_index_2007,
           hourly_compensation_index_2007,
-          gap_index_2007
+          hourly_compensation_real_index_2007 = if ("hourly_compensation_real_index_2007" %in% names(.)) {
+            hourly_compensation_real_index_2007
+          } else {
+            NA_real_
+          },
+          gap_nominal_index_2007 = if ("gap_nominal_index_2007" %in% names(.)) gap_nominal_index_2007 else gap_index_2007,
+          gap_real_index_2007 = if ("gap_real_index_2007" %in% names(.)) gap_real_index_2007 else gap_index_2007,
+          selected_gap_index_2007 = .data[[growth_cfg$gap_col]],
+          selected_compensation_index_2007 = .data[[growth_cfg$comp_col]],
+          selected_mode = growth_cfg$mode
         ) %>%
-        arrange(desc(gap_index_2007))
+        arrange(desc(selected_gap_index_2007))
       write.csv(df, file, row.names = FALSE)
     }
   )

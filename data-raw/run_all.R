@@ -18,87 +18,70 @@ base_year <- 2007
 
 metric_specs <- data.frame(
   metric_key = c("labor_productivity", "hourly_compensation", "unit_labor_cost"),
-  label_prefix = c(
-    "Labor Productivity for Private Nonfarm in ",
-    "Hourly Compensation for Private Nonfarm in ",
-    "Unit Labor Costs for Private Nonfarm in "
-  ),
-  search_text = c(
-    "Labor Productivity for Private Nonfarm in",
-    "Hourly Compensation for Private Nonfarm in",
-    "Unit Labor Costs for Private Nonfarm in"
-  ),
+  series_prefix = c("IPUZNL000", "IPUZNU130", "IPUZNU101"),
   stringsAsFactors = FALSE
 )
 
-message("Discovering state series IDs from FRED...")
-catalog_parts <- lapply(seq_len(nrow(metric_specs)), function(i) {
-  spec <- metric_specs[i, ]
-  links <- discover_metric_series(
-    search_text = spec$search_text,
-    label_prefix = spec$label_prefix,
-    max_pages = 10
-  )
-  links$metric_key <- spec$metric_key
-  links
-})
+message("Building deterministic BLS/FRED series IDs by state FIPS...")
+state_key <- state_fips_lookup() %>%
+  select(state_name, state_abbr, state_fips2)
 
-series_catalog <- bind_rows(catalog_parts) %>%
+series_catalog <- tidyr::crossing(
+  state_key,
+  metric_specs
+) %>%
+  mutate(series_id = paste0(series_prefix, state_fips2, "0000")) %>%
+  select(state_name, state_abbr, series_id, metric_key) %>%
   arrange(metric_key, state_name)
 
-if (nrow(series_catalog) == 0) {
-  stop("No series IDs were discovered. Check internet access and search parsing.")
-}
+validate_series_catalog <- function(catalog) {
+  expected_patterns <- c(
+    labor_productivity = "^IPUZNL000[0-9]{6}$",
+    hourly_compensation = "^IPUZNU130[0-9]{6}$",
+    unit_labor_cost = "^IPUZNU101[0-9]{6}$"
+  )
 
-lookup <- state_lookup()
-
-# Some states can be skipped by broad search ranking; recover them with targeted searches.
-for (i in seq_len(nrow(metric_specs))) {
-  spec <- metric_specs[i, ]
-  existing_states <- series_catalog %>%
-    filter(metric_key == spec$metric_key) %>%
-    pull(state_name)
-  missing_states <- setdiff(lookup$state_name, existing_states)
-
-  if (length(missing_states) == 0) {
-    next
-  }
-
-  recovered <- lapply(missing_states, function(st) {
-    target_search <- paste(spec$search_text, st)
-    search_url <- sprintf(
-      "https://fred.stlouisfed.org/searchresults/?st=%s",
-      URLencode(target_search, reserved = TRUE)
-    )
-    html <- download_text(search_url)
-    links <- extract_series_links(html, spec$label_prefix)
-    links <- links %>% filter(state_name == st)
-    if (nrow(links) == 0) {
-      return(NULL)
+  problems <- character(0)
+  for (metric in names(expected_patterns)) {
+    metric_rows <- catalog %>% filter(metric_key == metric)
+    bad_ids <- metric_rows %>%
+      filter(!grepl(expected_patterns[[metric]], series_id))
+    dup_states <- metric_rows$state_name[duplicated(metric_rows$state_name)]
+    if (nrow(bad_ids) > 0) {
+      problems <- c(
+        problems,
+        sprintf(
+          "%s has non-canonical IDs: %s",
+          metric,
+          paste(unique(bad_ids$series_id), collapse = ", ")
+        )
+      )
     }
-    links$metric_key <- spec$metric_key
-    links
-  })
-
-  recovered <- bind_rows(recovered)
-  if (nrow(recovered) > 0) {
-    series_catalog <- bind_rows(series_catalog, recovered)
+    if (length(dup_states) > 0) {
+      problems <- c(
+        problems,
+        sprintf(
+          "%s has duplicate states: %s",
+          metric,
+          paste(unique(dup_states), collapse = ", ")
+        )
+      )
+    }
+  }
+  if (length(problems) > 0) {
+    stop(
+      paste(
+        c(
+          "Series catalog validation failed.",
+          problems
+        ),
+        collapse = "\n- "
+      )
+    )
   }
 }
 
-series_catalog <- series_catalog %>%
-  distinct(metric_key, state_name, .keep_all = TRUE) %>%
-  arrange(metric_key, state_name)
-
-# For labor productivity, prefer the level series (IPUZNL000...) over growth-rate series (IPUZNL001...).
-series_catalog <- series_catalog %>%
-  mutate(
-    series_id = if_else(
-      metric_key == "labor_productivity",
-      sub("^IPUZNL001", "IPUZNL000", series_id),
-      series_id
-    )
-  )
+validate_series_catalog(series_catalog)
 
 expected_states <- nrow(state_lookup())
 coverage <- series_catalog %>%
@@ -119,7 +102,30 @@ if (any(coverage$n_states < expected_states)) {
 message("Downloading time series data...")
 series_rows <- lapply(seq_len(nrow(series_catalog)), function(i) {
   row <- series_catalog[i, ]
-  df <- fetch_fred_series(row$series_id)
+  df <- tryCatch(
+    fetch_fred_series(row$series_id),
+    error = function(e) {
+      stop(
+        sprintf(
+          "Failed to fetch series %s (%s, %s): %s",
+          row$series_id,
+          row$metric_key,
+          row$state_abbr,
+          conditionMessage(e)
+        )
+      )
+    }
+  )
+  if (nrow(df) == 0) {
+    stop(
+      sprintf(
+        "Series %s (%s, %s) returned no rows.",
+        row$series_id,
+        row$metric_key,
+        row$state_abbr
+      )
+    )
+  }
   df$state_name <- row$state_name
   df$state_abbr <- row$state_abbr
   df$metric_key <- row$metric_key
@@ -141,9 +147,30 @@ state_metrics_long <- bind_rows(series_rows) %>%
     )
   )
 
+missing_base_comp <- state_metrics_long %>%
+  filter(metric_key == "hourly_compensation", year == base_year) %>%
+  filter(is.na(value)) %>%
+  pull(state_abbr)
+if (length(missing_base_comp) > 0) {
+  stop(
+    sprintf(
+      "Base-year hourly compensation is missing for: %s",
+      paste(unique(missing_base_comp), collapse = ", ")
+    )
+  )
+}
+
+message("Downloading national GDP deflator (A191RD3A086NBEA)...")
+gdp_deflator <- fetch_fred_series("A191RD3A086NBEA") %>%
+  transmute(year, gdp_deflator_index_2017 = value)
+
 state_panel_raw <- state_metrics_long %>%
   select(state_name, state_abbr, year, metric_key, value) %>%
-  pivot_wider(names_from = metric_key, values_from = value)
+  pivot_wider(names_from = metric_key, values_from = value) %>%
+  left_join(gdp_deflator, by = "year") %>%
+  mutate(
+    hourly_compensation_real_2017 = hourly_compensation / (gdp_deflator_index_2017 / 100)
+  )
 
 state_panel_index <- state_metrics_long %>%
   select(state_name, state_abbr, year, metric_key, value_index_2007) %>%
@@ -153,10 +180,27 @@ state_panel_index <- state_metrics_long %>%
     names_glue = "{metric_key}_index_2007"
   )
 
+state_panel_real_index <- state_panel_raw %>%
+  group_by(state_name, state_abbr) %>%
+  arrange(year, .by_group = TRUE) %>%
+  mutate(
+    hourly_compensation_real_index_2007 = rebase_values(
+      hourly_compensation_real_2017,
+      year,
+      base_year = base_year
+    )
+  ) %>%
+  ungroup() %>%
+  select(state_name, state_abbr, year, hourly_compensation_real_index_2007)
+
 state_panel <- state_panel_raw %>%
   left_join(state_panel_index, by = c("state_name", "state_abbr", "year")) %>%
+  left_join(state_panel_real_index, by = c("state_name", "state_abbr", "year")) %>%
   mutate(
-    gap_index_2007 = labor_productivity_index_2007 - hourly_compensation_index_2007
+    gap_nominal_index_2007 = labor_productivity_index_2007 - hourly_compensation_index_2007,
+    gap_real_index_2007 = labor_productivity_index_2007 - hourly_compensation_real_index_2007,
+    # Keep legacy column name, but default it to real-gap for safer interpretation.
+    gap_index_2007 = gap_real_index_2007
   ) %>%
   arrange(year, state_name)
 

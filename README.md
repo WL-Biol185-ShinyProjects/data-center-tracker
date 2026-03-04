@@ -64,13 +64,14 @@ Canonical source links:
 
 Pipeline:
 
-1. Discover state-level series IDs for:
-   - labor productivity
-   - hourly compensation
-   - unit labor cost
-2. Download annual values by series.
-3. Rebase each state+metric series to `2007 = 100`.
-4. Build gap metric:
+1. Build deterministic FRED series IDs from state FIPS for:
+   - labor productivity (`IPUZNL000[STATE_FIPS]0000`)
+   - hourly compensation (`IPUZNU130[STATE_FIPS]0000`)
+   - unit labor cost (`IPUZNU101[STATE_FIPS]0000`)
+2. Validate IDs against canonical patterns and fail fast on malformed mappings.
+3. Download annual values by series.
+4. Rebase each state+metric series to `2007 = 100`.
+5. Build gap metric:
    - `gap_index_2007 = labor_productivity_index_2007 - hourly_compensation_index_2007`
 
 Key script:
@@ -89,7 +90,8 @@ Pipeline:
 4. Join state/year records and compute:
    - `gdp_per_job_real_2017 = (gdp_real_millions_2017 * 1e6) / employment_jobs_bea`
    - `qcew_avg_weekly_wage_real_rpp = qcew_avg_weekly_wage_nominal / (rpp_all_items_index / 100)`
-   - `wage_to_productivity_ratio_real = qcew_avg_weekly_wage_real_rpp / gdp_per_job_real_2017`
+   - `qcew_avg_annual_pay_real_rpp = qcew_avg_annual_pay_nominal / (rpp_all_items_index / 100)`
+   - `wage_to_productivity_ratio_real = qcew_avg_annual_pay_real_rpp / gdp_per_job_real_2017`
 5. Build index views for levels metrics (`2008 = 100`).
 
 Key script:
@@ -107,7 +109,8 @@ Key output:
 - `gdp_per_job_real_2017`: Real GDP per job (2017 dollars).
 - `qcew_avg_weekly_wage_nominal`: Nominal weekly wage from QCEW.
 - `qcew_avg_weekly_wage_real_rpp`: RPP-adjusted weekly wage.
-- `wage_to_productivity_ratio_real`: Real wage divided by real GDP per job.
+- `qcew_avg_annual_pay_real_rpp`: RPP-adjusted annual pay from QCEW.
+- `wage_to_productivity_ratio_real`: Annual real pay divided by real GDP per job.
 
 ## Reproducibility
 
@@ -218,8 +221,9 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 
 ## Limitations (Important)
 
-- Growth panel series IDs are discovered by scraping FRED search results; if FRED page structure changes, discovery may need maintenance.
-- Source concepts differ across systems (for example, output concept vs covered employment concept), so cross-source comparisons are descriptive, not causal.
+- Growth panel uses deterministic state-FIPS series IDs plus fail-fast validation to avoid silent series mis-mapping.
+- Source concepts differ across systems (for example, BEA total-economy GDP/jobs vs QCEW private-sector wages), so cross-source comparisons are descriptive, not causal.
+- Deflation concepts differ in levels views (RPP for wages vs chained 2017 dollars for GDP/job), so levels ratios should not be interpreted as structural labor-share estimates.
 - RPP availability and source revisions can change real-wage comparability for the latest years.
 
 ## Deliverables
