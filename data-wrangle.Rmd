@@ -114,9 +114,8 @@ print(head(first))
 ```
 
 ```{r}
-# CLEANUP FUNCTION FOR ALABAMA
-  # psudeocode
-  
+# CLEANUP FUNCTION FOR ALL STATES
+
 
 employed <- lapply(dataframes_list, function(table){
   if (substring(attr(table, "Series.Title"), 1 , 74) == "All Employees in Total Covered Total, all industries for All establishment" ){
@@ -135,6 +134,14 @@ employed <- lapply(dataframes_list, function(table){
 employed <- employed[!is.na(employed)]
 
 all_states_employed <- do.call(rbind, employed)
+
+
+establishment <- lapply(dataframes_list, function(estabCount){
+  if(substring(attr(table, "Series.Title"), x, x) == "TITLE"){
+    table$
+    
+  }
+})
 
 ```
 

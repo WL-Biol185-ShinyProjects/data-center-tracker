@@ -7,7 +7,7 @@ https://jacksonmaroon.shinyapps.io/productivity-vs-wages-atlas/
 
 ## Team
 
-- Toland
+- Nicolas
 - Jack
 - Cesar
 - Thomas
