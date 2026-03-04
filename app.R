@@ -68,19 +68,61 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       width = 3,
-      p("Private nonfarm, state-level annual metrics from the BLS productivity family."),
-      selectInput("year", "Year", choices = NULL),
-      selectInput("state", "State", choices = NULL),
-      selectInput(
-        "growth_wage_basis",
-        "Growth Wage Basis",
-        choices = c(
-          "Real (GDP deflator adjusted)" = "real",
-          "Nominal (not inflation-adjusted)" = "nominal"
-        ),
-        selected = "real"
+      conditionalPanel(
+        "input.main_tab == 'Map View' || input.main_tab == 'Gap Rankings' || input.main_tab == 'State Comparison'",
+        p("Growth frame: BLS private nonfarm productivity-family indices.")
       ),
-      selectInput("levels_metric", "Levels Map Metric", choices = levels_metric_choices)
+      conditionalPanel(
+        "input.main_tab == 'Map View' || input.main_tab == 'Gap Rankings' || input.main_tab == 'Levels Comparison'",
+        selectInput("year", "Year", choices = NULL)
+      ),
+      conditionalPanel(
+        "input.main_tab == 'State Comparison'",
+        selectInput("state", "State", choices = NULL)
+      ),
+      conditionalPanel(
+        "input.main_tab == 'Map View' || input.main_tab == 'Gap Rankings' || input.main_tab == 'State Comparison'",
+        selectInput(
+          "growth_wage_basis",
+          "Growth Wage Basis",
+          choices = c(
+            "Real (GDP deflator adjusted)" = "real",
+            "Nominal (not inflation-adjusted)" = "nominal"
+          ),
+          selected = "real"
+        )
+      ),
+      conditionalPanel(
+        "input.main_tab == 'Levels Comparison'",
+        p("Levels frame: BEA GDP/job + QCEW wages (+ RPP for real wage metrics)."),
+        selectInput("levels_metric", "Levels Map Metric", choices = levels_metric_choices)
+      ),
+      conditionalPanel(
+        "input.main_tab == 'About'",
+        p("No controls needed on this tab.")
+      ),
+      conditionalPanel(
+        "input.main_tab == 'Map View' || input.main_tab == 'Gap Rankings' || input.main_tab == 'State Comparison'",
+        tags$small(
+          class = "text-muted",
+          "Growth tabs use indices rebased to 2007 = 100."
+        )
+      ),
+      conditionalPanel(
+        "input.main_tab == 'Levels Comparison'",
+        tags$small(
+          class = "text-muted",
+          "Levels real metrics depend on RPP availability."
+        )
+      ),
+      conditionalPanel(
+        "input.main_tab == 'Map View' || input.main_tab == 'Gap Rankings' || input.main_tab == 'State Comparison' || input.main_tab == 'Levels Comparison'",
+        tags$hr(),
+        tags$small(
+          class = "text-muted",
+          "Controls are shown per-tab to reduce noise."
+        )
+      )
     ),
     mainPanel(
       width = 9,
@@ -138,7 +180,7 @@ ui <- fluidPage(
             tags$li(tags$a(href = "https://www.bea.gov/data/employment/employment-state", target = "_blank", "BEA Employment by State")),
             tags$li(tags$a(href = "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area", target = "_blank", "BEA Regional Price Parities"))
           )
-        )
+        ),
       )
     )
   )
@@ -582,7 +624,7 @@ server <- function(input, output, session) {
   )
 
   output$download_state_trends <- downloadHandler(
-    filename = function() sprintf("state_trend_%s_%s_%s.csv", input$state, input$growth_wage_basis, input$year),
+    filename = function() sprintf("state_trend_%s_%s.csv", input$state, input$growth_wage_basis),
     content = function(file) {
       growth_cfg <- growth_metric_config()
       df <- panel_data() %>%

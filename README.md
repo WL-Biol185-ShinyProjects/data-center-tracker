@@ -1,27 +1,10 @@
 # Productivity vs Wages Atlas (BIOL 185)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-Data Source:
-https://www.osti.gov/biblio/2550666
-=======
-=======
 State-by-state Shiny atlas for comparing productivity and wages in the U.S.
->>>>>>> dcdba694e31e11e315dd7118a223364ed6406260
 
 Live app:
 https://jacksonmaroon.shinyapps.io/productivity-vs-wages-atlas/
 
-<<<<<<< HEAD
-Data Sources:
-https://www.osti.gov/biblio/2550666
-https://www.osti.gov/biblio/2571680
-<<<<<<< HEAD
->>>>>>> 1ac7a8fab701b8c00a36a2efae6a1821baf43470
-=======
-
->>>>>>> c8bd91921c1cb3965500a095d065bf344cb4fffd
-=======
 ## Team
 
 - Toland
@@ -43,20 +26,21 @@ This app has two analysis frames:
 
 All numeric values come from public government datasets. The ETL scripts are deterministic transformations of those sources.
 
-| Metric family | Upstream source | Pull path in this repo | Years in current app data | Geography |
-|---|---|---|---|---|
-| Labor productivity, hourly compensation, unit labor cost | BLS Productivity by State (series discovered and downloaded via FRED endpoints) | `data-raw/run_all.R` using helpers in `R/helpers.R` | 2007-2024 | 50 states + DC |
-| State GDP and state employment | BEA Regional `SASUMMARY` zip | `data-raw/run_levels_all.R` | 2008-2024 | 50 states + DC |
-| Private-sector wages | BLS QCEW annual singlefile zips | `data-raw/run_levels_all.R` | 2008-2024 | 50 states + DC |
-| Regional price parity adjustment | BEA `RPP` zip | `data-raw/run_levels_all.R` | 2008-2023 in source file; app currently serves years with available joined data | 50 states + DC |
+| Metric family | Exact dataset endpoints used | Pull path in this repo | Pull date used for current committed snapshot | Years in current app data | Geography |
+|---|---|---|---|---|---|
+| Labor productivity, hourly compensation, unit labor cost + GDP deflator | FRED CSV API endpoints used directly in ETL: `https://fred.stlouisfed.org/graph/fredgraph.csv?id=<SERIES_ID>` (all state IDs from `data/series_catalog.csv`) and GDP deflator `https://fred.stlouisfed.org/graph/fredgraph.csv?id=A191RD3A086NBEA` | `data-raw/run_all.R` using helpers in `R/helpers.R` | 2026-03-04 (fresh pull during `run_all.R`) | 2007-2024 | 50 states + DC |
+| State GDP and state employment | BEA regional zip (exact file used): `https://apps.bea.gov/regional/zip/SASUMMARY.zip` | `data-raw/run_levels_all.R` | 2026-02-18 (cached input used in current build) | 2008-2024 | 50 states + DC |
+| Private-sector wages | BLS QCEW annual singlefile zips (exact pattern used): `https://data.bls.gov/cew/data/files/<YEAR>/csv/<YEAR>_annual_singlefile.zip` for years 2008-2024 | `data-raw/run_levels_all.R` | 2026-02-18 (cached input used in current build) | 2008-2024 | 50 states + DC |
+| Regional price parity adjustment | BEA RPP zip (exact file used): `https://apps.bea.gov/regional/zip/RPP.zip` | `data-raw/run_levels_all.R` | 2026-02-18 (cached input used in current build) | 2008-2023 in source file; app currently serves years with available joined data | 50 states + DC |
 
 Canonical source links:
 
-- BLS Productivity by State: https://www.bls.gov/lpc/state-productivity.htm
-- BLS QCEW: https://www.bls.gov/cew/
-- BEA GDP by State: https://www.bea.gov/data/gdp/gdp-state
-- BEA Employment by State: https://www.bea.gov/data/employment/employment-state
-- BEA Regional Price Parities: https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area
+- FRED CSV endpoint (exact transport used by ETL): https://fred.stlouisfed.org/graph/fredgraph.csv?id=IPUZNL000010000
+- FRED GDP deflator series used for real-growth transform: https://fred.stlouisfed.org/graph/fredgraph.csv?id=A191RD3A086NBEA
+- BEA SASUMMARY zip used in ETL: https://apps.bea.gov/regional/zip/SASUMMARY.zip
+- BEA RPP zip used in ETL: https://apps.bea.gov/regional/zip/RPP.zip
+- BLS QCEW annual singlefile zip (first year used): https://data.bls.gov/cew/data/files/2008/csv/2008_annual_singlefile.zip
+- BLS QCEW annual singlefile zip (latest year used): https://data.bls.gov/cew/data/files/2024/csv/2024_annual_singlefile.zip
 
 ## Methods (Step By Step)
 
@@ -160,10 +144,13 @@ Rscript -e 'testthat::test_dir("tests/testthat")'
 Rscript -e 'p<-read.csv("data/state_panel.csv"); l<-read.csv("data/state_levels_panel.csv"); cat("state_panel:",nrow(p),"rows | years",min(p$year),"-",max(p$year),"| states",length(unique(p$state_abbr)),"\n"); cat("state_levels_panel:",nrow(l),"rows | years",min(l$year),"-",max(l$year),"| states",length(unique(l$state_abbr)),"\n")'
 ```
 
-Current data snapshot in this repo (as checked on 2026-02-18):
+Current data snapshot in this repo (as checked on 2026-03-04):
 
 - `state_panel.csv`: 918 rows, years 2007-2024, 51 geographies (50 states + DC)
 - `state_levels_panel.csv`: 867 rows, years 2008-2024, 51 geographies (50 states + DC)
+- Snapshot build note:
+  - Growth panel (`run_all.R`) was pulled/refreshed on 2026-03-04.
+  - Levels panel (`run_levels_all.R`) was rebuilt on 2026-03-04 using cached upstream zip inputs pulled on 2026-02-18.
 
 ## Using Posit Workbench (WLU)
 
@@ -215,7 +202,7 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 
 ## App Use (3 Steps)
 
-1. Pick `Year` and `State` in the sidebar.
+1. Pick controls relevant to your current tab (Growth tabs: `Year` + `Growth Wage Basis`; State Comparison: `State`; Levels tab: `Year` + `Levels Map Metric`).
 2. Explore `Map View`, `State Comparison`, `Gap Rankings`, and `Levels Comparison`.
 3. Download the filtered CSV from each tab’s download button.
 
@@ -239,7 +226,6 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 ├── R/helpers.R
 ├── data/
 ├── data-raw/
-├── tests/
-└── deliverables/
+ ├── tests/
+ └── deliverables/
 ```
->>>>>>> dcdba694e31e11e315dd7118a223364ed6406260
