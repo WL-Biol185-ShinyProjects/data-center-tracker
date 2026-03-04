@@ -120,8 +120,12 @@ print(head(first))
 
 employed <- lapply(dataframes_list, function(table){
   if (substring(attr(table, "Series.Title"), 1 , 74) == "All Employees in Total Covered Total, all industries for All establishment" ){
-     table$state <- attr(table, "State")
+   
+    table$state <- attr(table, "State")
     
+    table$year <- as.numeric(table$Year)
+    
+     print(table) 
     }else{
       NA
    }
