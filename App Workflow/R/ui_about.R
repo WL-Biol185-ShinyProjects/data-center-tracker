@@ -54,7 +54,7 @@ about_tab <- tabPanel(
       # --- Section 2: Meet the Creators ---
       h3("About the Creators", style = "font-family: Georgia, serif;"),
       p("We are students at Washington and Lee University exploring the intersection of 
-   economics, data science, and visualization through the BIOL 185 curriculum."),
+         economics, data science, and visualization through the BIOL 185 curriculum."),
       
       tags$br(),
       
@@ -68,13 +68,13 @@ about_tab <- tabPanel(
             div(
               h4("Cesar Cachay", style = "font-weight: bold;"),
               p("Cesar is a student at Washington and Lee University interested in applying 
-           data science and analytics to solve complex problems. He is focused on 
-           leveraging quantitative tools to drive data-driven decision making."),
+                 data science and analytics to solve complex problems. He is focused on 
+                 leveraging quantitative tools to drive data-driven decision making."),
               tags$a(href = "https://www.linkedin.com/in/cesar-cachay/", target = "_blank", "LinkedIn Profile")
             )
           )
         )
-      ),
+      ), # <--- Ensure these commas exist!
       
       # Creator 2: Thomas K. Denton
       fluidRow(
@@ -86,9 +86,9 @@ about_tab <- tabPanel(
             div(
               h4("Thomas K. Denton", style = "font-weight: bold;"),
               p("Thomas is a student at Washington and Lee University pursuing a career in finance. 
-           A Level I CFA candidate, he focuses on how macroeconomic trends influence 
-           regional labor markets and investment strategies."),
-              tags$a(href = "https://www.linkedin.com/in/thomaskdenton/", target = "blank", "LinkedIn Profile")
+                 A Level I CFA candidate, he focuses on how macroeconomic trends influence 
+                 regional labor markets and investment strategies."),
+              tags$a(href = "https://www.linkedin.com/in/thomaskdenton/", target = "_blank", "LinkedIn Profile")
             )
           )
         )
@@ -104,8 +104,8 @@ about_tab <- tabPanel(
             div(
               h4("Jackson Maroon", style = "font-weight: bold;"),
               p("Jackson is a senior at Washington and Lee University studying Business 
-           Administration with a minor in Data Science. The Head AI Fellow at the 
-           W&L AI Lab, he will join Kearney in NYC as a Business Analyst after graduation."),
+                 Administration with a minor in Data Science. The Head AI Fellow at the 
+                 W&L AI Lab, he will join Kearney in NYC as a Business Analyst after graduation."),
               tags$a(href = "https://www.linkedin.com/in/jacksonmaroon/", target = "_blank", "LinkedIn Profile")
             )
           )
@@ -122,12 +122,14 @@ about_tab <- tabPanel(
             div(
               h4("Nicolas Toland", style = "font-weight: bold;"),
               p("Nicolas is a student at Washington and Lee University. He is exploring the 
-           intersection of data science and visualization through the BIOL 185 curriculum, 
-           focusing on the communication of high-dimensional economic data.")
+                 intersection of data science and visualization through the BIOL 185 curriculum, 
+                 focusing on the communication of high-dimensional economic data.")
             )
           )
         )
-      )
+      ),
+      
+      hr(),
       
       # --- Section 3: Data Sources & Methodology ---
       fluidRow(
@@ -135,14 +137,10 @@ about_tab <- tabPanel(
           width = 6,
           h4("Data Sources", style = "font-family: Georgia, serif;"),
           tags$ul(
-            tags$li(tags$a(href = "https://www.bls.gov/lpc/state-productivity.htm", "BLS State Productivity"), 
-                    ": State-level output and hours worked."),
-            tags$li(tags$a(href = "https://www.bls.gov/cew/", "BLS QCEW"), 
-                    ": Quarterly Census of Employment and Wages for private-sector pay."),
-            tags$li(tags$a(href = "https://www.bea.gov/data/gdp/gdp-state", "BEA GDP by State"), 
-                    ": Real GDP data in chained 2017 dollars."),
-            tags$li(tags$a(href = "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area", "BEA RPP"), 
-                    ": Regional Price Parities used for spatial cost-of-living adjustments.")
+            tags$li(tags$a(href = "https://www.bls.gov/lpc/state-productivity.htm", "BLS State Productivity")),
+            tags$li(tags$a(href = "https://www.bls.gov/cew/", "BLS QCEW")),
+            tags$li(tags$a(href = "https://www.bea.gov/data/gdp/gdp-state", "BEA GDP by State")),
+            tags$li(tags$a(href = "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area", "BEA Regional Price Parities"))
           )
         ),
         column(
@@ -150,10 +148,8 @@ about_tab <- tabPanel(
           h4("Methods & Limitations", style = "font-family: Georgia, serif;"),
           tags$small(
             p("Real wages are calculated using the BEA Regional Price Parity (RPP) to account for 
-               state-level inflation and cost-of-living differences. GDP per job is derived from 
-               BEA total-economy data, while wages are sourced from QCEW private-sector records."),
-            p("Note: These visualizations represent descriptive cross-state signals and should 
-               not be interpreted as causal or structural labor-share estimates.")
+               state-level inflation. GDP per job is derived from BEA total-economy data."),
+            p("Note: These are descriptive cross-state signals, not causal claims.")
           )
         )
       ),
@@ -172,4 +168,3 @@ about_tab <- tabPanel(
     )
   )
 )
-
