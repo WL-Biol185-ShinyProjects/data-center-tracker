@@ -54,41 +54,80 @@ about_tab <- tabPanel(
       # --- Section 2: Meet the Creators ---
       h3("About the Creators", style = "font-family: Georgia, serif;"),
       p("We are students at Washington and Lee University exploring the intersection of 
-         economics, data science, and visualization through the BIOL 185 curriculum."),
+   economics, data science, and visualization through the BIOL 185 curriculum."),
       
+      tags$br(),
+      
+      # Creator 1: Cesar Cachay
       fluidRow(
-        # Creator 1 (Thomas)
         column(
-          width = 6,
+          width = 10, offset = 1,
           div(
-            style = "display: flex; align-items: start; margin-bottom: 20px;",
-            # Uncomment the img tag below once you add a photo to your /www folder
-            # img(src = "thomas_denton.jpg", width = "120px", style = "border-radius: 50%; margin-right: 20px;"),
+            style = "display: flex; align-items: start; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;",
+            # img(src = "cesar_cachay.jpg", width = "130px", style = "border-radius: 5px; margin-right: 25px;"),
             div(
-              h4("Thomas K. Denton"),
-              p("Thomas is a student at Washington and Lee University pursuing a career in finance. 
-                 He is a Level I CFA candidate with a strong interest in how macroeconomic trends 
-                 influence regional labor markets and investment strategies.")
-            )
-          )
-        ),
-        # Creator 2 (Placeholder - e.g., Dylan)
-        column(
-          width = 6,
-          div(
-            style = "display: flex; align-items: start; margin-bottom: 20px;",
-            # img(src = "dylan_reher.jpg", width = "120px", style = "border-radius: 50%; margin-right: 20px;"),
-            div(
-              h4("Dylan Reher"),
-              p("Dylan is a student in BIOL 185 at Washington and Lee University. He contributed 
-                 to the data wrangling and visualization architecture of this dashboard, focusing 
-                 on the relationship between regional price parities and real wage growth.")
+              h4("Cesar Cachay", style = "font-weight: bold;"),
+              p("Cesar is a student at Washington and Lee University interested in applying 
+           data science and analytics to solve complex problems. He is focused on 
+           leveraging quantitative tools to drive data-driven decision making."),
+              tags$a(href = "https://www.linkedin.com/in/cesar-cachay/", target = "_blank", "LinkedIn Profile")
             )
           )
         )
       ),
       
-      hr(),
+      # Creator 2: Thomas K. Denton
+      fluidRow(
+        column(
+          width = 10, offset = 1,
+          div(
+            style = "display: flex; align-items: start; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;",
+            # img(src = "thomas_denton.jpg", width = "130px", style = "border-radius: 5px; margin-right: 25px;"),
+            div(
+              h4("Thomas K. Denton", style = "font-weight: bold;"),
+              p("Thomas is a student at Washington and Lee University pursuing a career in finance. 
+           A Level I CFA candidate, he focuses on how macroeconomic trends influence 
+           regional labor markets and investment strategies."),
+              tags$a(href = "https://www.linkedin.com/in/thomaskdenton/", target = "blank", "LinkedIn Profile")
+            )
+          )
+        )
+      ),
+      
+      # Creator 3: Jackson Maroon
+      fluidRow(
+        column(
+          width = 10, offset = 1,
+          div(
+            style = "display: flex; align-items: start; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;",
+            # img(src = "jackson_maroon.jpg", width = "130px", style = "border-radius: 5px; margin-right: 25px;"),
+            div(
+              h4("Jackson Maroon", style = "font-weight: bold;"),
+              p("Jackson is a senior at Washington and Lee University studying Business 
+           Administration with a minor in Data Science. The Head AI Fellow at the 
+           W&L AI Lab, he will join Kearney in NYC as a Business Analyst after graduation."),
+              tags$a(href = "https://www.linkedin.com/in/jacksonmaroon/", target = "_blank", "LinkedIn Profile")
+            )
+          )
+        )
+      ),
+      
+      # Creator 4: Nicolas Toland
+      fluidRow(
+        column(
+          width = 10, offset = 1,
+          div(
+            style = "display: flex; align-items: start; margin-bottom: 30px;",
+            # img(src = "nicolas_toland.jpg", width = "130px", style = "border-radius: 5px; margin-right: 25px;"),
+            div(
+              h4("Nicolas Toland", style = "font-weight: bold;"),
+              p("Nicolas is a student at Washington and Lee University. He is exploring the 
+           intersection of data science and visualization through the BIOL 185 curriculum, 
+           focusing on the communication of high-dimensional economic data.")
+            )
+          )
+        )
+      )
       
       # --- Section 3: Data Sources & Methodology ---
       fluidRow(
