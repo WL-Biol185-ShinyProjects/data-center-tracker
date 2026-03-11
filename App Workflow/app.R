@@ -37,6 +37,8 @@ source("R/ui_levels.R")
 source("R/ui_about.R")
 source("R/server_growth_tabs.R")
 source("R/server_levels_tab.R")
+source("R/ui_heatmap.R")
+source("R/server_heatmap_tab.R")
 
 
 # ---- Custom CSS ----
@@ -120,6 +122,7 @@ ui <- navbarPage(
   comparison_tab,
   rankings_tab,
   levels_tab,
+  heatmap_tab,
   about_tab
 )
 
@@ -138,6 +141,9 @@ server <- function(input, output, session) {
   # Levels tab server
   levels_tab_server(input, output, session,
                     levels_data)
+  # Heat map tab server
+  heatmap_tab_server(input, output, session,
+                     panel_data)
 }
 
 
