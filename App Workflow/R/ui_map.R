@@ -49,7 +49,7 @@ map_tab <- tabPanel(
     # ---- Map Plot ----
     column(
       width = 9,
-      plotOutput("gap_map", height = "550px"),
+      leafletOutput("gap_map", height = "550px"),
       tags$br(),
       downloadButton("download_gap_map", "Download Map Data (CSV)")
     )
