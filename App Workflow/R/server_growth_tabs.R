@@ -100,49 +100,64 @@ growth_tabs_server <- function(input, output, session,
   })
 
 
-  # ---- MAP: Render Choropleth ----
-  output$gap_map <- renderPlot({
+  # ---- MAP: Render Leaflet Choropleth ----
+  output$gap_map <- renderLeaflet({
     req(yearly_data())
     growth_cfg <- growth_metric_config()
-    us_map     <- load_us_map()
-    validate(need(!is.null(us_map),
-                  "Install the `maps` package to see the map."))
-
-    # Join gap data to map polygons
-    map_df <- us_map %>%
-      left_join(
-        yearly_data() %>%
-          transmute(state_name,
-                    gap_value = .data[[growth_cfg$gap_col]]),
-        by = c("region" = "state_name")
+    
+    # -- Step 1: get this year's data --
+    map_data <- yearly_data() %>%
+      transmute(
+        state_name,
+        gap_value = .data[[growth_cfg$gap_col]]
       )
-
-    # Draw the map
-    ggplot(map_df, aes(long, lat, group = group, fill = gap_value)) +
-      geom_polygon(color = "white", linewidth = 0.15) +
-      coord_fixed(1.3) +
-      scale_fill_gradient2(
-        low      = "#B2182B",
-        mid      = "#F7F7F7",
-        high     = "#2166AC",
-        midpoint = 0,
-        na.value = "grey90",
-        labels   = label_number(accuracy = 0.1),
-        name     = "Gap\n(Index pts)"
-      ) +
-      labs(
-        title    = paste0("Productivity-Compensation Gap (",
-                          input$year, ")"),
-        subtitle = paste0(growth_cfg$gap_label,
-                          " = productivity index - compensation index",
-                          " (2007 = 100)"),
-        x = NULL, y = NULL
-      ) +
-      theme_minimal(base_size = 12) +
-      theme(
-        axis.text  = element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid = element_blank()
+    
+    # -- Step 2: join in lat/lon from our lookup --
+    map_data <- map_data %>%
+      left_join(state_coords, by = "state_name") %>%
+      filter(!is.na(lat), !is.na(lon))
+    
+    # -- Step 3: build a color palette --
+    # red = negative gap, white = zero, blue = positive
+    color_range <- range(map_data$gap_value, na.rm = TRUE)
+    pal <- colorNumeric(
+      palette  = c("#B2182B", "#F7F7F7", "#2166AC"),
+      domain   = color_range
+    )
+    
+    # -- Step 4: build the popup text for each state --
+    map_data <- map_data %>%
+      mutate(
+        popup_text = paste0(
+          "<b>", to_title(state_name), "</b><br>",
+          growth_cfg$gap_label, ": ",
+          round(gap_value, 1), " pts"
+        )
+      )
+    
+    # -- Step 5: draw the leaflet map --
+    # Uses CartoDB.Positron for a clean light background
+    # (shown in the class lesson as a nice option)
+    leaflet(data = map_data) %>%
+      setView(lng = -96, lat = 37.8, zoom = 4) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addCircleMarkers(
+        lng     = ~lon,
+        lat     = ~lat,
+        radius  = ~abs(gap_value) * 0.8,
+        color   = ~pal(gap_value),
+        fillOpacity = 0.7,
+        stroke  = TRUE,
+        weight  = 1,
+        popup   = ~popup_text,
+        label   = ~to_title(state_name)
+      ) %>%
+      addLegend(
+        position = "bottomright",
+        pal      = pal,
+        values   = ~gap_value,
+        title    = "Gap (Index pts)",
+        opacity  = 0.8
       )
   })
 
