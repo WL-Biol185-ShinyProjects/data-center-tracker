@@ -51,6 +51,7 @@ app_css <- tags$head(
       text-align: center;
       margin-top: 30px;
       margin-bottom: 10px;
+      letter-spacing: 2px;
     }
 
     .main-subtitle {
@@ -59,6 +60,8 @@ app_css <- tags$head(
       text-align: center;
       color: #6c757d;
       margin-bottom: 30px;
+      padding-bottom: 20px;                    
+      border-bottom: 2px solid #2c3e50;        
     }
 
     /* Feature cards on home page */
