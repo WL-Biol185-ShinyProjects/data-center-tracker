@@ -6,6 +6,8 @@
 # The server logic for this tab is in server_growth_tabs.R.
 # ============================================================
 
+# ---- Load leaflet for map output ----
+library(leaflet)
 
 map_tab <- tabPanel(
   "Map View",
