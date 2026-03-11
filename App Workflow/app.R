@@ -39,29 +39,31 @@ source("R/server_growth_tabs.R")
 source("R/server_levels_tab.R")
 
 
-# ---- Custom CSS (Women's Health-style design) ----
+# ---- Custom CSS ----
 app_css <- tags$head(
   tags$style(HTML("
 
-    /* Serif font for headings - matches Women's Health screenshot */
+    /* Main page title - large bold serif at top of home page */
     .main-title {
       font-family: 'Georgia', 'Times New Roman', serif;
       font-size: 2.5em;
       font-weight: bold;
       text-align: center;
+      color: #2c3e50;
+      letter-spacing: 2px;
       margin-top: 30px;
       margin-bottom: 10px;
-      letter-spacing: 2px;
     }
 
+    /* Subtitle below the main title */
     .main-subtitle {
       font-family: 'Georgia', 'Times New Roman', serif;
       font-size: 1.1em;
       text-align: center;
       color: #6c757d;
       margin-bottom: 30px;
-      padding-bottom: 20px;                    
-      border-bottom: 2px solid #2c3e50;        
+      padding-bottom: 20px;
+      border-bottom: 2px solid #2c3e50;
     }
 
     /* Feature cards on home page */
@@ -72,21 +74,32 @@ app_css <- tags$head(
       margin: 10px 0;
       background: white;
       min-height: 180px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: box-shadow 0.2s ease;
     }
 
+    /* Card lifts slightly when hovered */
+    .feature-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Card headings - bold serif to match page title */
     .feature-card h4 {
       font-family: 'Georgia', 'Times New Roman', serif;
+      font-weight: bold;
+      color: #2c3e50;
     }
 
-    /* Light background band for sections */
+    /* Light background band used in the About section */
     .section-light {
       background-color: #f0f4f8;
       padding: 40px 20px;
       border-radius: 8px;
       margin: 20px 0;
+      border-left: 4px solid #2c3e50;
     }
 
-    /* Tab titles in serif */
+    /* All h3 headings use serif font to stay consistent */
     h3 {
       font-family: 'Georgia', 'Times New Roman', serif;
     }
@@ -97,11 +110,11 @@ app_css <- tags$head(
 
 # ---- UI: navbarPage Layout ----
 ui <- navbarPage(
-
+  
   title  = "Productivity vs Wages Atlas",
   id     = "main_tab",
   header = app_css,
-
+  
   home_tab,
   map_tab,
   comparison_tab,
@@ -113,15 +126,15 @@ ui <- navbarPage(
 
 # ---- Server ----
 server <- function(input, output, session) {
-
+  
   # Load data once as reactiveVals (same as your original)
   panel_data  <- reactiveVal(load_panel_data())
   levels_data <- reactiveVal(load_levels_data())
-
+  
   # Growth tabs server (map, comparison, rankings)
   growth_tabs_server(input, output, session,
                      panel_data, levels_data)
-
+  
   # Levels tab server
   levels_tab_server(input, output, session,
                     levels_data)

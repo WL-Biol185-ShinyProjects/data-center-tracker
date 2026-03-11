@@ -82,7 +82,8 @@ levels_metric_labels <- c(
   wage_to_productivity_ratio_real  = "Compensation-to-Productivity Ratio"
 )
 
+# NEW (fixed) - input$levels_metric correctly returns the column name
 levels_metric_choices <- stats::setNames(
-  names(levels_metric_labels),
-  levels_metric_labels
+  names(levels_metric_labels),   # VALUES = column names (what gets returned)
+  unname(levels_metric_labels)   # NAMES  = display labels (what user sees)
 )
