@@ -67,7 +67,7 @@ about_tab <- tabPanel(
             # img(src = "cesar_cachay.jpg", width = "130px", style = "border-radius: 5px; margin-right: 25px;"),
             div(
               h4("Cesar Cachay", style = "font-weight: bold;"),
-              p("Cesar is a student at Washington and Lee University interested in applying 
+              p("Cesar is an Engineering student at Washington and Lee University interested in applying 
                  data science and analytics to solve complex problems. He is focused on 
                  leveraging quantitative tools to drive data-driven decision making."),
               tags$a(href = "https://www.linkedin.com/in/cesar-cachay/", target = "_blank", "LinkedIn Profile")
