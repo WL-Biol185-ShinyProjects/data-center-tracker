@@ -66,6 +66,14 @@ load_us_map <- function() {
   ggplot2::map_data("state")
 }
 
+# ---- State Coordinates Lookup ----
+# Built-in R data: gives lat/lon for each state center
+state_coords <- data.frame(
+  state_name = tolower(state.name),
+  lat        = state.center$y,
+  lon        = state.center$x,
+  stringsAsFactors = FALSE
+)
 
 # ---- Levels Metric Labels (used by Levels tab) ----
 levels_metric_labels <- c(
