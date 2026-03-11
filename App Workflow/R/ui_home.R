@@ -19,7 +19,7 @@ home_tab <- tabPanel(
   # ---- Subtitle ----
   div(
     class = "main-subtitle",
-    "Productivity vs. Income Across America"
+    "Productivity vs. Wages"
   ),
   
   tags$hr(),
