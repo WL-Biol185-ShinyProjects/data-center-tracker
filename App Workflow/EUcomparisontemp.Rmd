@@ -4,3 +4,6 @@ output: html_document
 ---
 # Source for GDP data for the EU annually "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?end=2024&locations=EU&start=1960&view=chart" 
 
+# Source for worker productivity https://data.ecb.europa.eu/data/datasets/MNA/MNA.Q.Y.I9.W0.S1.S1._Z.LPR_HW._Z.OTQ._Z.IX.LR.N
+
+# Intent of coming branch will be to compare the overall national labor productivity gap in the United states with the EU, another conglomeration of economies, to give better background to either draw similiarities or differences between the two unique economical situations. The EU was chosen over that of China due to the absence of much public data for China, alongside with the fact that China's command economy is not comparable with more capitalistic systems in the political west.
