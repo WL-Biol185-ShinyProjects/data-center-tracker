@@ -55,7 +55,7 @@ levels_tab_server <- function(input, output, session,
       left_join(plot_df, by = c("region" = "state_name"))
     
     # Pick label format based on metric type
-    if (metric_col %in% c("gdp_per_job_real_2023",
+    if (metric_col %in% c("gdp_per_job_real_2017",
                           "qcew_avg_weekly_wage_real_rpp")) {
       value_labels <- label_dollar(accuracy = 1)
     } else if (metric_col == "wage_to_productivity_ratio_real") {
@@ -91,18 +91,18 @@ levels_tab_server <- function(input, output, session,
   # ---- Levels: Scatter Data ----
   # Filters to rows with both GDP and wage values
   # Note: 2024 is excluded because RPP data is not yet available,
-  # so real wage cannot be calculated - scatter defaults to 2023
+  # so real wage cannot be calculated - scatter defaults to 2017
   levels_scatter_data <- reactive({
     req(levels_yearly_data())
     
     df <- levels_yearly_data() %>%
-      filter(!is.na(gdp_per_job_real_2023),
+      filter(!is.na(gdp_per_job_real_2017),
              !is.na(qcew_avg_weekly_wage_real_rpp))
     
     # If no rows (e.g. 2024 selected), fall back to most recent valid year
     if (nrow(df) == 0) {
       df <- levels_data() %>%
-        filter(!is.na(gdp_per_job_real_2023),
+        filter(!is.na(gdp_per_job_real_2017),
                !is.na(qcew_avg_weekly_wage_real_rpp)) %>%
         filter(year == max(year, na.rm = TRUE))
     }
@@ -134,12 +134,12 @@ levels_tab_server <- function(input, output, session,
       # Build hover text using $ notation to avoid aes() scoping issues
       df$hover_text <- paste0(
         "State: ", to_title(df$state_name), " (", df$state_abbr, ")",
-        "<br>GDP/job: ",     label_dollar(accuracy = 1)(df$gdp_per_job_real_2023),
+        "<br>GDP/job: ",     label_dollar(accuracy = 1)(df$gdp_per_job_real_2017),
         "<br>Weekly wage: ", label_dollar(accuracy = 1)(df$qcew_avg_weekly_wage_real_rpp)
       )
       
       gg <- ggplot(df, aes(
-        x     = gdp_per_job_real_2023,
+        x     = gdp_per_job_real_2017,
         y     = qcew_avg_weekly_wage_real_rpp,
         text  = hover_text,
         label = state_abbr
@@ -155,7 +155,7 @@ levels_tab_server <- function(input, output, session,
         labs(
           title    = paste0("State Levels Comparison (", input$year, ")"),
           subtitle = "x: Real GDP per job | y: Real weekly wage (RPP-adj)",
-          x = "Real GDP per job (2023 dollars)",
+          x = "Real GDP per job (2017 dollars)",
           y = "Real weekly wage (RPP-adjusted)"
         ) +
         theme_minimal(base_size = 12)
@@ -174,7 +174,7 @@ levels_tab_server <- function(input, output, session,
     validate(need(nrow(df) > 0,
                   paste("No levels data for year", input$year)))
     
-    ggplot(df, aes(x = gdp_per_job_real_2023,
+    ggplot(df, aes(x = gdp_per_job_real_2017,
                    y = qcew_avg_weekly_wage_real_rpp,
                    label = state_abbr)) +
       geom_point(color = "#2166AC", alpha = 0.8, size = 2.6) +
@@ -188,7 +188,7 @@ levels_tab_server <- function(input, output, session,
       labs(
         title    = paste0("State Levels Comparison (", input$year, ")"),
         subtitle = "x: Real GDP per job | y: Real weekly wage (RPP-adj)",
-        x = "Real GDP per job (2023 dollars)",
+        x = "Real GDP per job (2017 dollars)",
         y = "Real weekly wage (RPP-adjusted)"
       ) +
       theme_minimal(base_size = 12)
@@ -203,7 +203,7 @@ levels_tab_server <- function(input, output, session,
                   "Levels data not loaded."))
     
     metric_col       <- input$levels_metric
-    metric_is_dollar <- metric_col %in% c("gdp_per_job_real_2023",
+    metric_is_dollar <- metric_col %in% c("gdp_per_job_real_2017",
                                           "qcew_avg_weekly_wage_real_rpp")
     
     # Convert to plain data frame first to allow safe df[[col]] indexing
@@ -221,7 +221,7 @@ levels_tab_server <- function(input, output, session,
     result <- data.frame(
       State                    = to_title(df$state_name),
       `Selected Metric`        = metric_values,
-      `GDP per Job (Real)`     = round(df$gdp_per_job_real_2023, 0),
+      `GDP per Job (Real)`     = round(df$gdp_per_job_real_2017, 0),
       `Weekly Wage (Nominal)`  = round(df$qcew_avg_weekly_wage_nominal, 0),
       `Weekly Wage (Real RPP)` = round(df$qcew_avg_weekly_wage_real_rpp, 0),
       `RPP`                    = round(df$rpp_all_items_index, 1),
