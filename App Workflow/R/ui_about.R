@@ -123,7 +123,8 @@ about_tab <- tabPanel(
               h4("Nicolas Toland", style = "font-weight: bold;"),
               p("Nicolas is a student at Washington and Lee University. He is exploring the 
                  intersection of data science and visualization through the BIOL 185 curriculum, 
-                 focusing on the communication of high-dimensional economic data.")
+                 focusing on the communication of high-dimensional data for practical viewership.") ,
+              tags$a(href = "www.linkedin.com/in/nicolas-toland-42457626b", target = "_blank", "LinkedIn Profile")
             )
           )
         )
