@@ -91,7 +91,7 @@ levels_tab_server <- function(input, output, session,
   # ---- Levels: Scatter Data ----
   # Filters to rows with both GDP and wage values
   # Note: 2024 is excluded because RPP data is not yet available,
-  # so real wage cannot be calculated - scatter defaults to 2017
+  # so real wage cannot be calculated - scatter defaults to 2023
   levels_scatter_data <- reactive({
     req(levels_yearly_data())
     
