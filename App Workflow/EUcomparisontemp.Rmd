@@ -2,6 +2,5 @@
 title: "EUcomparisontemp"
 output: html_document
 ---
-
 # Source for GDP data for the EU annually "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?end=2024&locations=EU&start=1960&view=chart" 
-#
+
