@@ -10,6 +10,23 @@
 heatmap_tab_server <- function(input, output, session,
                                panel_data) {
   
+  # ---- Fill state dropdown on load ----
+  observe({
+    df <- panel_data()
+    req(!is.null(df), nrow(df) > 0)
+    
+    states <- sort(unique(df$state_name))
+    state_choices <- setNames(states, to_title(states))
+    
+    updateSelectInput(
+      session,
+      inputId  = "heatmap_state",
+      choices  = state_choices,
+      selected = states[1]
+    )
+  })
+  
+  
   # ---- Render the heat map ----
   output$heatmap_plot <- renderPlot({
     
@@ -21,50 +38,18 @@ heatmap_tab_server <- function(input, output, session,
       return(NULL)
     }
     
-    # -- Step 3: Filter to selected year range --
+    # -- Step 3: Check that a state is selected --
+    req(input$heatmap_state)
+    
+    # -- Step 4: Filter to selected state and year range --
     df_filtered <- df %>%
       filter(
+        state_name == input$heatmap_state,
         year >= input$heatmap_year_range[1],
         year <= input$heatmap_year_range[2]
       )
     
-    # -- Step 4: Figure out sort order for states --
-    # Get the latest year in the filtered data
-    latest_year <- max(df_filtered$year, na.rm = TRUE)
     
-    # Get gap values for the latest year only
-    latest_gaps <- df_filtered %>%
-      filter(year == latest_year) %>%
-      select(state_name, gap_real_index_2007)
-    
-    # Sort based on user choice
-    if (input$heatmap_sort == "gap_desc") {
-      
-      # Largest gap on top
-      state_order <- latest_gaps %>%
-        arrange(gap_real_index_2007) %>%
-        pull(state_name)
-      
-    } else if (input$heatmap_sort == "gap_asc") {
-      
-      # Smallest gap on top
-      state_order <- latest_gaps %>%
-        arrange(desc(gap_real_index_2007)) %>%
-        pull(state_name)
-      
-    } else {
-      
-      # Alphabetical (reversed so A is on top)
-      state_order <- sort(unique(df_filtered$state_name),
-                          decreasing = TRUE)
-      
-    }
-    
-    # -- Step 5: Set state_name as a factor with our order --
-    df_filtered <- df_filtered %>%
-      mutate(
-        state_name = factor(state_name, levels = state_order)
-      )
     
     # -- Step 6: Build the heat map with ggplot + geom_tile --
     ggplot(df_filtered,
