@@ -8,4 +8,22 @@ output: html_document
 
 library(tidyverse)
 
-raw_gdp <- read.csv("App Workflow/data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_46.csv", header = TRUE)
+raw_gdp <- read.csv("App Workflow/data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_46.csv", header = TRUE, na.strings = "")
+countries <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyrpus", "Czechia", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovak Republic", "Slovenia", "Spain", "Sweden")
+EU_gdps <- raw_gdp %>%
+    filter(Country.Name %in% countries) %>%
+    select(-Country.Code, -Indicator.Name, -Indicator.Code ) %>%
+    gather(key = "year", value = "index", X1960:X)
+    
+
+sumtable <- EU_gdps %>%
+  group_by(year) %>%
+      summarize(avr_gdp =
+              mean(index, na.rm = TRUE))
+colnames(EU_gdps) <- tolower(colnames(EU_gdps))
+ 
+
+summary(EU_gdps)
+
+
+```
