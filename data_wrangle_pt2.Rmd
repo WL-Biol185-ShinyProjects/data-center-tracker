@@ -1,0 +1,11 @@
+---
+title: "data_wrangle_pt2"
+output: html_document
+---
+
+```{r}
+# Averaging quarterly data into annual data.
+
+library(tidyverse)
+
+raw_gdp <- read.csv("App Workflow/data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_46.csv", header = TRUE)
