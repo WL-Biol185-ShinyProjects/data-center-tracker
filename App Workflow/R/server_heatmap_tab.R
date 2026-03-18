@@ -73,10 +73,10 @@ heatmap_tab_server <- function(input, output, session,
       ) +
       theme_minimal() +
       theme(
-        axis.text.y  = element_text(size = 8),
-        axis.text.x  = element_text(size = 10),
-        legend.title  = element_text(size = 10),
-        legend.text   = element_text(size = 9),
+        axis.text.y  = element_text(size = 14, color = "black"),
+        axis.text.x  = element_text(size = 13, color = "black"),
+        legend.title  = element_text(size = 13, color = "black"),
+        legend.text   = element_text(size = 12, color = "black"),
         panel.grid    = element_blank()
       )
     # ---- end ggplot ----
