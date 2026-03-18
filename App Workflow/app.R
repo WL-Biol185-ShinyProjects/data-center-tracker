@@ -46,32 +46,44 @@ source("R/ui_outsideUS.R")
 app_css <- tags$head(
   tags$style(HTML("
 
-    /* Main page title - large bold serif at top of home page */
-    .main-title {
-      font-family: 'Georgia', 'Times New Roman', serif;
-      font-size: 2.5em;
-      font-weight: bold;
-      text-align: center;
-      color: #2c3e50;
-      letter-spacing: 2px;
-      margin-top: 30px;
-      margin-bottom: 10px;
+/* Navbar - navy blue background with white text */
+    .navbar {
+      background-color: #1a2744 !important;
+      border-bottom: 3px solid #c8a96e;
     }
 
-    /* Subtitle below the main title */
-    .main-subtitle {
+    .navbar-brand, .navbar-nav > li > a {
+      color: #ffffff !important;
       font-family: 'Georgia', 'Times New Roman', serif;
-      font-size: 1.1em;
-      text-align: center;
-      color: #6c757d;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #2c3e50;
     }
 
-    /* Feature cards on home page */
+    .navbar-nav > li > a:hover {
+      color: #c8a96e !important;
+      background-color: transparent !important;
+    }
+
+    .navbar-nav > li.active > a {
+      color: #c8a96e !important;
+      background-color: rgba(255,255,255,0.1) !important;
+    }
+
+/* Page background - warm cream, easy on the eyes */
+    body {
+      background-color: #f5f0e8;
+    }
+    
+    /* Section background updated to complement cream */
+    .section-light {
+      background-color: #eae4d8;
+      padding: 40px 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #1a2744;
+    }
+
+    /* Cards updated to stay white against cream background */
     .feature-card {
-      border: 1px solid #dee2e6;
+      border: 1px solid #d4c9b0;
       border-radius: 8px;
       padding: 20px;
       margin: 10px 0;
@@ -81,34 +93,40 @@ app_css <- tags$head(
       transition: box-shadow 0.2s ease;
     }
 
-    /* Card lifts slightly when hovered */
     .feature-card:hover {
       box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      border-color: #1a2744;
     }
-
-    /* Card headings - bold serif to match page title */
-    .feature-card h4 {
+    
+    /* Title color updated to navy */
+    .main-title {
       font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 2.5em;
       font-weight: bold;
-      color: #2c3e50;
+      text-align: center;
+      color: #1a2744;
+      letter-spacing: 2px;
+      margin-top: 30px;
+      margin-bottom: 10px;
     }
 
-    /* Light background band used in the About section */
-    .section-light {
-      background-color: #f0f4f8;
-      padding: 40px 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-      border-left: 4px solid #2c3e50;
-    }
-
-    /* All h3 headings use serif font to stay consistent */
-    h3 {
+    .main-subtitle {
       font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 1.1em;
+      text-align: center;
+      color: #6c757d;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #1a2744;
     }
 
-  "))
+
+ "))
 )
+
+
+
+
 
 
 # ---- UI: navbarPage Layout ----
