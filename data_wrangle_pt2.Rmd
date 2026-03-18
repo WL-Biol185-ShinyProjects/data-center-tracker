@@ -25,5 +25,14 @@ colnames(EU_gdps) <- tolower(colnames(EU_gdps))
 
 summary(EU_gdps)
 
+raw_labor <- read.csv("App Workflow/data/ECB_Data Portal_20260316215613.csv", header = TRUE)
+
+
+raw_labor$TIME.PERIOD <- gsub("Q\\d", "", raw_labor$TIME.PERIOD)
+
+sumlabor <- raw_labor %>%
+  group_by(TIME.PERIOD) %>%
+    summarize(quarter_avr =
+                mean(Labour.Productivity..per.hours.worked...index..MNA.Q.Y.I9.W0.S1.S1._Z.LPR_HW._Z.OTQ._Z.IX.LR.N.))
 
 ```
