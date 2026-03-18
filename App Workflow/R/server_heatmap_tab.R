@@ -73,9 +73,9 @@ heatmap_tab_server <- function(input, output, session,
                fill = gap_real_index_2007)) +
       geom_tile(color = "white", linewidth = 0.3) +
       scale_fill_gradient2(
-        low      = "#2166ac",
-        mid      = "#ffffbf",
-        high     = "#b2182b",
+        low      = "#0072B2",  # blue - safe for all color blindness types
+        mid      = "#F5F5F5",  # light grey - neutral midpoint
+        high     = "#E69F00",  # orange - safe for all color blindness types
         midpoint = 0,
         name     = "Gap Index\n(2007 = 0)"
       ) +
