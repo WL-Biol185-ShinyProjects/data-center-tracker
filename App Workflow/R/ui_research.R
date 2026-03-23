@@ -222,7 +222,75 @@ research_tab <- tabPanel(
     )
   ),
   
-  # ---- Section 5: What Our Dashboard Shows ----
+  # ---- Section 5: W&L Faculty Research ----
+  fluidRow(
+    column(
+      width = 8, offset = 2,
+      div(
+        style = "background-color: #eae4d8;
+                 padding: 25px;
+                 border-radius: 8px;
+                 border-left: 5px solid #c8a96e;
+                 margin-bottom: 25px;",
+        h3("W&L Faculty Research: The 4th Industrial Revolution",
+           style = "font-family: Georgia, serif;
+                    color: #1a2744;
+                    margin-top: 0;"),
+        p("Washington & Lee economists Art Goldsmith
+           and Jim Casey have published research
+           directly connecting technological change
+           to the productivity-wage gap. Their 2024
+           presidential address to the Southern
+           Economic Association, published in the",
+          tags$em("Southern Economic Journal,"),
+          "argues that the 4th Industrial Revolution
+           is fundamentally different from prior
+           industrial revolutions."),
+        p("Previous waves of technological change
+           were skill-neutral: they improved
+           productivity and wages for workers across
+           the education spectrum. The technologies
+           of the 4th IR, including AI, machine
+           learning, and industrial robotics, are
+           skill-biased. They augment the productivity
+           of highly educated workers performing
+           non-routine cognitive tasks while displacing
+           those in middle-skill routine jobs."),
+        p("This has produced job polarization: a
+           hollowing out of middle-class employment.
+           Goldsmith and Casey find that long-term
+           unemployment (27+ weeks) rose from 13% of
+           total unemployment before the 4th IR to
+           nearly 30% by 2010-2023, which they view
+           as indirect evidence of growing
+           technological unemployment."),
+        p("They propose policy solutions including
+           tax incentives for firms that reinstate
+           displaced workers and government-subsidized
+           certificate programs as alternatives to
+           traditional college degrees for reskilling."),
+        p(
+          tags$em("Sources: "),
+          tags$a(
+            href = "https://doi.org/10.1002/soej.12714",
+            target = "_blank",
+            "Goldsmith & Casey (2024),
+             Southern Economic Journal"
+          ),
+          " | ",
+          tags$a(
+            href = "https://columns.wlu.edu/wl-professor-to-deliver-lecture-at-the-federal-reserve-bank-of-richmond/",
+            target = "_blank",
+            "W&L Columns: Goldsmith at the
+             Richmond Fed"
+          ),
+          style = "font-size: 12px; color: #6c757d;"
+        )
+      )
+    )
+  ),
+  
+  # ---- Section 6: What Our Dashboard Shows ----
   fluidRow(
     column(
       width = 8, offset = 2,
@@ -251,16 +319,17 @@ research_tab <- tabPanel(
     )
   ),
   
-  # ---- Section 6: AI and the Future of the Gap ----
+  # ---- Section 7: AI and the Future of the Gap ----
   fluidRow(
     column(
       width = 8, offset = 2,
       div(
-        style = "background-color: #eae4d8;
+        style = "background-color: #FFFFFF;
                  padding: 25px;
                  border-radius: 8px;
-                 border-left: 5px solid #c8a96e;
-                 margin-bottom: 25px;",
+                 border-left: 5px solid #1a2744;
+                 margin-bottom: 25px;
+                 border: 1px solid #d4c9b0;",
         h3("Looking Ahead: AI and the Productivity-Pay Gap",
            style = "font-family: Georgia, serif;
                     color: #1a2744;
@@ -341,11 +410,6 @@ research_tab <- tabPanel(
         h4("References",
            style = "font-family: Georgia, serif;
                     color: #1a2744;"),
-        p("Clark, J.B. (1899).",
-          tags$em("The Distribution of Wealth."),
-          "Macmillan.",
-          style = "font-size: 13px;
-                   margin-bottom: 8px;"),
         p("Baker, D. (2024).",
           tags$em("The Productivity-Pay Gap and
                    Phony Debates."),
@@ -360,6 +424,11 @@ research_tab <- tabPanel(
            U.S. Bureau of Labor Statistics.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
+        p("Clark, J.B. (1899).",
+          tags$em("The Distribution of Wealth."),
+          "Macmillan.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
         p("Economic Policy Institute. (2024).",
           tags$em("The Productivity-Pay Gap."),
           "Retrieved from epi.org.",
@@ -369,6 +438,13 @@ research_tab <- tabPanel(
           tags$em("An AI Productivity Boom? Don't Count
                    Your (Productivity Data) Chickens."),
           "The Budget Lab at Yale.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
+        p("Goldsmith, A.H. & Casey, J.F. (2024).",
+          tags$em("The fourth industrial revolution
+                   and the future of work: Reasons
+                   to worry and policies to consider."),
+          "Southern Economic Journal, 91(2), 333-350.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
         p("Letzing, J. (2025).",

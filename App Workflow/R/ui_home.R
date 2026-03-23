@@ -107,7 +107,8 @@ home_tab <- tabPanel(
                  padding: 30px;
                  border-radius: 8px;
                  border-left: 5px solid #2c3e50;
-                 margin-bottom: 30px;",
+                 margin-bottom: 30px;
+                 text-align: center;",
         h3("About This Project",
            style = "font-family: Georgia, serif;
                     font-weight: bold;
@@ -117,6 +118,7 @@ home_tab <- tabPanel(
            explores that gap across all 50 states using publicly
            available data from the Bureau of Labor Statistics and the
            Bureau of Economic Analysis."),
+        tags$br(),
         p("Use the tabs above to explore interactive maps, compare
            individual states over time, and see which states have the
            largest productivity-wage gaps.")
