@@ -7,6 +7,7 @@ output: html_document
 # Averaging quarterly data into annual data.
 
 library(tidyverse)
+library(data.table)
 # This section takes the EU data, cleans it up, and turns it into annual data.
 raw_gdp <- read.csv("App Workflow/data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_46.csv", header = TRUE, na.strings = "")
 countries <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyrpus", "Czechia", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovak Republic", "Slovenia", "Spain", "Sweden")
@@ -35,10 +36,33 @@ sumlabor <- raw_labor %>%
     summarize(quarter_avr =
                 mean(Labour.Productivity..per.hours.worked...index..MNA.Q.Y.I9.W0.S1.S1._Z.LPR_HW._Z.OTQ._Z.IX.LR.N.))
 
+#Merging GDP and Productivity for both
+
+sumlabor <- setnames(sumlabor, "TIME.PERIOD", "year")
+
+EU_total <- left_join(sumlabor, sumtable)
+
+
+
 
 # Cleanup for fredgraph.csv. Turning data points into annual data.
 
 raw_fred <- read.csv("App Workflow/data/fredgraph.csv")
 
 raw_fred$observation_date <- substring(raw_fred$observation_date, 1, 4)
+
+sum_fred <- setnames(raw_fred, "observation_date", "year")
+
+sum_fred <- setnames(raw_fred, "COMPNFB_CPIAUCSL", "compensation")
+
+sum_fred <- setnames(raw_fred, "OPHNFB_NBD19700101", "productivity")
+
+fred_annual <- sum_fred %>%
+    group_by(year) %>%
+    summarize(compensation = mean(compensation), productivity = mean(productivity))
+
+
+# Tie it allll together
+compare_total <- left_join(EU_total, fred_annual)
+compare_total$avr_gdp <- 
 ```
