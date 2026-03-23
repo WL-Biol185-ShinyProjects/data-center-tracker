@@ -144,12 +144,12 @@ levels_tab_server <- function(input, output, session,
         text  = hover_text,
         label = state_abbr
       )) +
-        geom_point(color = "#2166AC", alpha = 0.8, size = 2.6) +
+        geom_point(color = "#0072B2", alpha = 0.8, size = 2.6) +
         geom_text(size = 2.6, check_overlap = TRUE,
                   vjust = -0.6, color = "#444444") +
         geom_smooth(method = "lm", se = FALSE,
                     formula = y ~ x,
-                    color = "#B2182B", linewidth = 0.9) +
+                    color = "#E69F00", linewidth = 0.9) +
         scale_x_continuous(labels = label_dollar()) +
         scale_y_continuous(labels = label_dollar()) +
         labs(
@@ -177,12 +177,12 @@ levels_tab_server <- function(input, output, session,
     ggplot(df, aes(x = gdp_per_job_real_2017,
                    y = qcew_avg_weekly_wage_real_rpp,
                    label = state_abbr)) +
-      geom_point(color = "#2166AC", alpha = 0.8, size = 2.6) +
+      geom_point(color = "#0072B2", alpha = 0.8, size = 2.6) +
       geom_text(size = 2.6, check_overlap = TRUE,
                 vjust = -0.6, color = "#444444") +
       geom_smooth(method = "lm", se = FALSE,
                   formula = y ~ x,
-                  color = "#B2182B", linewidth = 0.9) +
+                  color = "#E69F00", linewidth = 0.9) +
       scale_x_continuous(labels = label_dollar()) +
       scale_y_continuous(labels = label_dollar()) +
       labs(
