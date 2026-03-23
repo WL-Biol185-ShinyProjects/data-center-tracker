@@ -11,7 +11,7 @@ research_tab <- tabPanel(
   
   # ---- Page Title ----
   div(
-    style = "background-color: #2c3e50;
+    style = "background-color: #1a2744;
              color: #FFFFFF;
              text-align: center;
              padding: 40px 20px;
@@ -20,7 +20,7 @@ research_tab <- tabPanel(
        style = "font-family: Georgia, serif;
                 margin-bottom: 5px;"),
     p("The economics behind the productivity-wage gap",
-      style = "color: #d4af37;
+      style = "color: #c8a96e;
                font-size: 16px;
                margin-top: 0;")
   ),
@@ -30,14 +30,14 @@ research_tab <- tabPanel(
     column(
       width = 8, offset = 2,
       div(
-        style = "background-color: #f5f0e1;
+        style = "background-color: #eae4d8;
                  padding: 25px;
                  border-radius: 8px;
-                 border-left: 5px solid #d4af37;
+                 border-left: 5px solid #c8a96e;
                  margin-bottom: 25px;",
         h3("Marginal Productivity Theory",
            style = "font-family: Georgia, serif;
-                    color: #2c3e50;
+                    color: #1a2744;
                     margin-top: 0;"),
         p("At the core of this dashboard is a fundamental
            question in economics: should workers be paid
@@ -75,12 +75,12 @@ research_tab <- tabPanel(
         style = "background-color: #FFFFFF;
                  padding: 25px;
                  border-radius: 8px;
-                 border-left: 5px solid #2c3e50;
+                 border-left: 5px solid #1a2744;
                  margin-bottom: 25px;
-                 border: 1px solid #dee2e6;",
+                 border: 1px solid #d4c9b0;",
         h3("The EPI Argument: Policy Drove the Gap",
            style = "font-family: Georgia, serif;
-                    color: #2c3e50;
+                    color: #1a2744;
                     margin-top: 0;"),
         p("The Economic Policy Institute (EPI) has
            produced the most widely cited research on
@@ -120,14 +120,14 @@ research_tab <- tabPanel(
     column(
       width = 8, offset = 2,
       div(
-        style = "background-color: #f5f0e1;
+        style = "background-color: #eae4d8;
                  padding: 25px;
                  border-radius: 8px;
-                 border-left: 5px solid #d4af37;
+                 border-left: 5px solid #c8a96e;
                  margin-bottom: 25px;",
         h3("BLS Industry-Level Evidence",
            style = "font-family: Georgia, serif;
-                    color: #2c3e50;
+                    color: #1a2744;
                     margin-top: 0;"),
         p("A 2017 Bureau of Labor Statistics study
            examined the gap across 183 detailed
@@ -168,12 +168,12 @@ research_tab <- tabPanel(
         style = "background-color: #FFFFFF;
                  padding: 25px;
                  border-radius: 8px;
-                 border-left: 5px solid #2c3e50;
+                 border-left: 5px solid #1a2744;
                  margin-bottom: 25px;
-                 border: 1px solid #dee2e6;",
+                 border: 1px solid #d4c9b0;",
         h3("The Measurement Debate",
            style = "font-family: Georgia, serif;
-                    color: #2c3e50;
+                    color: #1a2744;
                     margin-top: 0;"),
         p("Not all economists agree the gap is as
            large as EPI claims. Critics raise several
@@ -227,14 +227,14 @@ research_tab <- tabPanel(
     column(
       width = 8, offset = 2,
       div(
-        style = "background-color: #2c3e50;
+        style = "background-color: #1a2744;
                  color: #FFFFFF;
                  padding: 25px;
                  border-radius: 8px;
                  margin-bottom: 25px;",
         h3("What Our Dashboard Explores",
            style = "font-family: Georgia, serif;
-                    color: #d4af37;
+                    color: #c8a96e;
                     margin-top: 0;"),
         p("This dashboard brings the national debate
            down to the state level. Using BLS and BEA
@@ -251,6 +251,86 @@ research_tab <- tabPanel(
     )
   ),
   
+  # ---- Section 6: AI and the Future of the Gap ----
+  fluidRow(
+    column(
+      width = 8, offset = 2,
+      div(
+        style = "background-color: #eae4d8;
+                 padding: 25px;
+                 border-radius: 8px;
+                 border-left: 5px solid #c8a96e;
+                 margin-bottom: 25px;",
+        h3("Looking Ahead: AI and the Productivity-Pay Gap",
+           style = "font-family: Georgia, serif;
+                    color: #1a2744;
+                    margin-top: 0;"),
+        p("Artificial intelligence adds a new dimension
+           to the productivity-wage debate. Previous
+           waves of automation primarily displaced
+           middle-skill, routine jobs like clerical work
+           and factory assembly. AI is different: it
+           increasingly affects higher-paying roles
+           involving information processing and
+           analysis."),
+        p("A 2025 NBER study using 58 million LinkedIn
+           profiles found that when AI can perform most
+           tasks in a given role, employment in that
+           role falls by about 14%. However, firms that
+           adopted AI grew faster in revenue and
+           employment, which offset many of these
+           losses. Through 2023, AI-exposed roles had
+           not experienced net job losses relative to
+           other roles."),
+        p("Whether AI will widen or narrow the
+           productivity-pay gap remains an open
+           question. Optimists argue that AI-driven
+           productivity gains could lift wages if
+           workers are equipped to use these tools.
+           Skeptics warn that without policy
+           intervention, the gains will flow
+           disproportionately to capital owners and
+           top earners, deepening the same patterns
+           observed since the 1970s."),
+        p("Recent productivity data has also drawn
+           scrutiny. A Yale Budget Lab analysis
+           cautions that apparent productivity gains
+           in 2025 may reflect noisy measurement and
+           compositional effects rather than a true
+           AI-driven boom."),
+        p("A World Economic Forum survey of chief
+           economists found that while nearly half
+           view worker augmentation as one of AI's
+           biggest benefits for growth, increasing
+           inequality ranked among their top
+           assessed risks. Three out of four said
+           government spending on upskilling and
+           redeployment should be a priority."),
+        p(
+          tags$em("Sources: "),
+          tags$a(
+            href = "https://mitsloan.mit.edu/ideas-made-to-matter/how-artificial-intelligence-impacts-us-labor-market",
+            target = "_blank",
+            "MIT Sloan / NBER (2025)"
+          ),
+          " | ",
+          tags$a(
+            href = "https://budgetlab.yale.edu/research/ai-productivity-boom-dont-count-your-productivity-data-chickens",
+            target = "_blank",
+            "Yale Budget Lab (2026)"
+          ),
+          " | ",
+          tags$a(
+            href = "https://www.weforum.org/stories/2025/05/productivity-pay-artificial-intelligence/",
+            target = "_blank",
+            "World Economic Forum (2025)"
+          ),
+          style = "font-size: 12px; color: #6c757d;"
+        )
+      )
+    )
+  ),
+  
   # ---- References List ----
   fluidRow(
     column(
@@ -260,7 +340,18 @@ research_tab <- tabPanel(
                  margin-bottom: 20px;",
         h4("References",
            style = "font-family: Georgia, serif;
-                    color: #2c3e50;"),
+                    color: #1a2744;"),
+        p("Clark, J.B. (1899).",
+          tags$em("The Distribution of Wealth."),
+          "Macmillan.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
+        p("Baker, D. (2024).",
+          tags$em("The Productivity-Pay Gap and
+                   Phony Debates."),
+          "Center for Economic and Policy Research.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
         p("Brill, M., Holman, C., Morris, C.,
            Raichoudhary, R., & Yosif, N. (2017).",
           tags$em("Understanding the labor productivity
@@ -274,21 +365,29 @@ research_tab <- tabPanel(
           "Retrieved from epi.org.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
-        p("Baker, D. (2024).",
-          tags$em("The Productivity-Pay Gap and
-                   Phony Debates."),
-          "Center for Economic and Policy Research.",
+        p("Gimbel, M. (2026).",
+          tags$em("An AI Productivity Boom? Don't Count
+                   Your (Productivity Data) Chickens."),
+          "The Budget Lab at Yale.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
+        p("Letzing, J. (2025).",
+          tags$em("AI could make us more productive,
+                   can it also make us better paid?"),
+          "World Economic Forum.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
+        p("Schmidt, L., Hampole, M., Papanikolaou, D.,
+           & Seegmiller, B. (2025).",
+          tags$em("Artificial Intelligence and the
+                   Labor Market."),
+          "NBER Working Paper No. 33509.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
         p("Schneider, D. (2023).",
           tags$em("Pay, Productivity, and the
                    Labor Share."),
           "Medium.",
-          style = "font-size: 13px;
-                   margin-bottom: 8px;"),
-        p("Clark, J.B. (1899).",
-          tags$em("The Distribution of Wealth."),
-          "Macmillan.",
           style = "font-size: 13px;
                    margin-bottom: 8px;")
       )
