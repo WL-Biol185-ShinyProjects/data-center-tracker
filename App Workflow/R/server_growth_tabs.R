@@ -29,6 +29,20 @@ growth_tabs_server <- function(input, output, session,
     )
   })
   
+  # ---- Fill State 2 Dropdown ----
+  observe({
+    df <- panel_data()
+    req(!is.null(df), nrow(df) > 0)
+    
+    states <- sort(unique(df$state_name))
+    state_choices <- c("" = "", setNames(states, to_title(states)))
+    
+    updateSelectInput(
+      session, "state_2",
+      choices  = state_choices,
+      selected = ""
+    )
+  })
   
   # ---- Fill Year Dropdown ----
   observe({
@@ -180,7 +194,9 @@ growth_tabs_server <- function(input, output, session,
       geom_point(size = 1.8) +
       scale_color_manual(
         values = stats::setNames(
-          c("#0072B2", "#E69F00"),
+          c("
+#0072B2", "
+#E69F00"),
           c("Labor Productivity", growth_cfg$comp_label)
         )
       ) +
@@ -194,7 +210,6 @@ growth_tabs_server <- function(input, output, session,
       theme_minimal(base_size = 12)
   })
   
-  
   # ---- RANKINGS: Render Table ----
   output$rank_table <- renderTable({
     req(yearly_data())
@@ -203,7 +218,7 @@ growth_tabs_server <- function(input, output, session,
     out <- yearly_data() %>%
       transmute(
         State                    = to_title(state_name),
-        `Productivity (2007=100)` = round(labor_productivity_index_2007, 1),
+        Productivity (2007=100) = round(labor_productivity_index_2007, 1),
         Compensation             = round(.data[[growth_cfg$comp_col]], 1),
         Gap                      = round(.data[[growth_cfg$gap_col]], 1)
       ) %>%
@@ -213,7 +228,6 @@ growth_tabs_server <- function(input, output, session,
     names(out)[3] <- paste0(growth_cfg$comp_label, " (2007=100)")
     out
   })
-  
   
   # ---- Download Handlers ----
   output$download_gap_map <- downloadHandler(
@@ -244,7 +258,6 @@ growth_tabs_server <- function(input, output, session,
       write.csv(yearly_data(), file, row.names = FALSE)
     }
   )
-  
   
   # ---- Return shared reactives for Levels tab to use ----
   return(list(
