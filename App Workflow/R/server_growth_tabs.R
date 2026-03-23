@@ -29,20 +29,6 @@ growth_tabs_server <- function(input, output, session,
     )
   })
   
-  # ---- Fill State 2 Dropdown ----
-  observe({
-    df <- panel_data()
-    req(!is.null(df), nrow(df) > 0)
-    
-    states <- sort(unique(df$state_name))
-    state_choices <- c("" = "", setNames(states, to_title(states)))
-    
-    updateSelectInput(
-      session, "state_2",
-      choices  = state_choices,
-      selected = ""
-    )
-  })
   
   # ---- Fill Year Dropdown ----
   observe({
@@ -166,31 +152,17 @@ growth_tabs_server <- function(input, output, session,
     req(panel_data(), input$state)
     growth_cfg <- growth_metric_config()
     
-    # -- Decide which states to show --
-    selected_states <- input$state
-    
-    # -- If button clicked and state 2 is filled, add it --
-    if (!is.null(input$compare_go) && input$compare_go > 0) {
-      isolate({
-        if (!is.null(input$state_2) && input$state_2 != "") {
-          selected_states <- c(input$state, input$state_2)
-        }
-      })
-    }
-    
-    # -- Filter to selected state(s) and reshape --
+    # Filter to selected state and reshape for plotting
     df <- panel_data() %>%
-      filter(state_name %in% selected_states) %>%
+      filter(state_name == input$state) %>%
       arrange(year) %>%
       select(
-        state_name,
         year,
         labor_productivity_index_2007,
         compensation_index = all_of(growth_cfg$comp_col)
       ) %>%
       pivot_longer(
-        cols      = c(labor_productivity_index_2007,
-                      compensation_index),
+        cols      = -year,
         names_to  = "metric",
         values_to = "value"
       ) %>%
@@ -199,26 +171,11 @@ growth_tabs_server <- function(input, output, session,
           metric,
           labor_productivity_index_2007 = "Labor Productivity",
           compensation_index            = growth_cfg$comp_label
-        ),
-        state_display = to_title(state_name)
+        )
       )
     
-    # -- Build title --
-    if (length(selected_states) == 1) {
-      plot_title <- paste("State Trend:",
-                          to_title(selected_states[1]))
-    } else {
-      plot_title <- paste("Comparison:",
-                          to_title(selected_states[1]),
-                          "vs.",
-                          to_title(selected_states[2]))
-    }
-    
-    # -- Draw the line chart --
-    p <- ggplot(df, aes(x        = year,
-                        y        = value,
-                        color    = metric,
-                        linetype = state_display)) +
+    # Draw the line chart
+    ggplot(df, aes(x = year, y = value, color = metric)) +
       geom_line(linewidth = 1.1) +
       geom_point(size = 1.8) +
       scale_color_manual(
@@ -228,23 +185,15 @@ growth_tabs_server <- function(input, output, session,
         )
       ) +
       labs(
-        title    = plot_title,
+        title    = paste("State Trend:", to_title(input$state)),
         subtitle = "Both series rebased to 2007 = 100",
-        x        = NULL,
-        y        = "Index (2007 = 100)",
-        color    = "Metric",
-        linetype = "State"
+        x     = NULL,
+        y     = "Index (2007 = 100)",
+        color = NULL
       ) +
-      theme_minimal(base_size = 12) +
-      theme(legend.position = "bottom")
-    
-    # -- If only one state, hide linetype legend --
-    if (length(selected_states) == 1) {
-      p <- p + guides(linetype = "none")
-    }
-    
-    p
+      theme_minimal(base_size = 12)
   })
+  
   
   # ---- RANKINGS: Render Table ----
   output$rank_table <- renderTable({
@@ -253,10 +202,10 @@ growth_tabs_server <- function(input, output, session,
     
     out <- yearly_data() %>%
       transmute(
-        State                     = to_title(state_name),
+        State                    = to_title(state_name),
         `Productivity (2007=100)` = round(labor_productivity_index_2007, 1),
-        Compensation              = round(.data[[growth_cfg$comp_col]], 1),
-        Gap                       = round(.data[[growth_cfg$gap_col]], 1)
+        Compensation             = round(.data[[growth_cfg$comp_col]], 1),
+        Gap                      = round(.data[[growth_cfg$gap_col]], 1)
       ) %>%
       arrange(desc(Gap))
     
@@ -264,6 +213,7 @@ growth_tabs_server <- function(input, output, session,
     names(out)[3] <- paste0(growth_cfg$comp_label, " (2007=100)")
     out
   })
+  
   
   # ---- Download Handlers ----
   output$download_gap_map <- downloadHandler(
@@ -294,6 +244,7 @@ growth_tabs_server <- function(input, output, session,
       write.csv(yearly_data(), file, row.names = FALSE)
     }
   )
+  
   
   # ---- Return shared reactives for Levels tab to use ----
   return(list(
