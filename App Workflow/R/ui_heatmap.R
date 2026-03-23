@@ -1,9 +1,8 @@
 # ============================================================
 # ui_heatmap.R - Heat Map Tab UI
 # ============================================================
-# Owner: [YOUR NAME]
-# This file defines the layout for the Heat Map tab.
-# It shows states (rows) x years (columns), filled by gap.
+# UPDATED: Now supports selecting multiple states, or
+# leaving blank to show all 50 states at once.
 # ============================================================
 
 # ---- Heat Map Tab ----
@@ -23,13 +22,19 @@ heatmap_tab <- tabPanel(
     sidebarPanel(
       width = 3,
       
-      # -- State selector - pick one state to view --
-      selectInput(
+      # -- State selector - pick multiple or leave blank for all --
+      selectizeInput(
         inputId  = "heatmap_state",
-        label    = "Select State:",
-        choices  = NULL,        # filled in by server on load
-        selected = NULL
+        label    = "Select State(s):",
+        choices  = NULL,
+        multiple = TRUE,
+        options  = list(
+          placeholder = "Leave blank for all states..."
+        )
       ),
+      
+      # -- Helper text --
+      helpText("Leave blank to show all 50 states."),
       
       # -- Year range slider --
       sliderInput(
@@ -50,7 +55,7 @@ heatmap_tab <- tabPanel(
       width = 9,
       plotOutput(
         outputId = "heatmap_plot",
-        height   = "200px"      # shorter height since only one state now
+        height   = "900px"
       )
     )
     # ---- end mainPanel ----
