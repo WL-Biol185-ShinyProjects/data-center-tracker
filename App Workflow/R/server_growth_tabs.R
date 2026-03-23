@@ -166,17 +166,31 @@ growth_tabs_server <- function(input, output, session,
     req(panel_data(), input$state)
     growth_cfg <- growth_metric_config()
     
-    # Filter to selected state and reshape for plotting
+    # -- Decide which states to show --
+    selected_states <- input$state
+    
+    # -- If button clicked and state 2 is filled, add it --
+    if (!is.null(input$compare_go) && input$compare_go > 0) {
+      isolate({
+        if (!is.null(input$state_2) && input$state_2 != "") {
+          selected_states <- c(input$state, input$state_2)
+        }
+      })
+    }
+    
+    # -- Filter to selected state(s) and reshape --
     df <- panel_data() %>%
-      filter(state_name == input$state) %>%
+      filter(state_name %in% selected_states) %>%
       arrange(year) %>%
       select(
+        state_name,
         year,
         labor_productivity_index_2007,
         compensation_index = all_of(growth_cfg$comp_col)
       ) %>%
       pivot_longer(
-        cols      = -year,
+        cols      = c(labor_productivity_index_2007,
+                      compensation_index),
         names_to  = "metric",
         values_to = "value"
       ) %>%
@@ -185,29 +199,51 @@ growth_tabs_server <- function(input, output, session,
           metric,
           labor_productivity_index_2007 = "Labor Productivity",
           compensation_index            = growth_cfg$comp_label
-        )
+        ),
+        state_display = to_title(state_name)
       )
     
-    # Draw the line chart
-    ggplot(df, aes(x = year, y = value, color = metric)) +
+    # -- Build title --
+    if (length(selected_states) == 1) {
+      plot_title <- paste("State Trend:",
+                          to_title(selected_states[1]))
+    } else {
+      plot_title <- paste("Comparison:",
+                          to_title(selected_states[1]),
+                          "vs.",
+                          to_title(selected_states[2]))
+    }
+    
+    # -- Draw the line chart --
+    p <- ggplot(df, aes(x        = year,
+                        y        = value,
+                        color    = metric,
+                        linetype = state_display)) +
       geom_line(linewidth = 1.1) +
       geom_point(size = 1.8) +
       scale_color_manual(
         values = stats::setNames(
-          c("
-#0072B2", "
-#E69F00"),
+          c("#0072B2", "#E69F00"),
           c("Labor Productivity", growth_cfg$comp_label)
         )
       ) +
       labs(
-        title    = paste("State Trend:", to_title(input$state)),
+        title    = plot_title,
         subtitle = "Both series rebased to 2007 = 100",
-        x     = NULL,
-        y     = "Index (2007 = 100)",
-        color = NULL
+        x        = NULL,
+        y        = "Index (2007 = 100)",
+        color    = "Metric",
+        linetype = "State"
       ) +
-      theme_minimal(base_size = 12)
+      theme_minimal(base_size = 12) +
+      theme(legend.position = "bottom")
+    
+    # -- If only one state, hide linetype legend --
+    if (length(selected_states) == 1) {
+      p <- p + guides(linetype = "none")
+    }
+    
+    p
   })
   
   # ---- RANKINGS: Render Table ----
@@ -217,10 +253,10 @@ growth_tabs_server <- function(input, output, session,
     
     out <- yearly_data() %>%
       transmute(
-        State                    = to_title(state_name),
-        Productivity (2007=100) = round(labor_productivity_index_2007, 1),
-        Compensation             = round(.data[[growth_cfg$comp_col]], 1),
-        Gap                      = round(.data[[growth_cfg$gap_col]], 1)
+        State                     = to_title(state_name),
+        `Productivity (2007=100)` = round(labor_productivity_index_2007, 1),
+        Compensation              = round(.data[[growth_cfg$comp_col]], 1),
+        Gap                       = round(.data[[growth_cfg$gap_col]], 1)
       ) %>%
       arrange(desc(Gap))
     
