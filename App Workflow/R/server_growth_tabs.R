@@ -16,19 +16,28 @@
 growth_tabs_server <- function(input, output, session,
                                panel_data, levels_data) {
   
-  # ---- Fill State Dropdown ----
+  # ---- Fill State Dropdowns ----
   observe({
     df <- panel_data()
     req(!is.null(df), nrow(df) > 0)
     
     states <- sort(unique(df$state_name))
+    
+    # Fill State 1 dropdown ----
     updateSelectInput(
       session, "state",
       choices  = setNames(states, to_title(states)),
       selected = if ("california" %in% states) "california" else states[1]
     )
+    
+    # Fill State 2 dropdown (blank = no second state) ----
+    state_2_choices <- c("" = "", setNames(states, to_title(states)))
+    updateSelectInput(
+      session, "state_2",
+      choices  = state_2_choices,
+      selected = ""
+    )
   })
-  
   
   # ---- Fill Year Dropdown ----
   observe({
@@ -146,23 +155,35 @@ growth_tabs_server <- function(input, output, session,
       )
   })
   
-  
-  # ---- COMPARISON: Render Line Chart ----
-  output$state_trends <- renderPlot({
-    req(panel_data(), input$state)
+  # ---- COMPARISON: Filtered Data (runs on button click) ----
+  compare_data <- eventReactive(input$compare_go, {
+    
+    # Grab both state selections ----
+    state_1 <- input$state
+    state_2 <- input$state_2
+    req(state_1)
+    
     growth_cfg <- growth_metric_config()
     
-    # Filter to selected state and reshape for plotting
+    # Decide which states to include ----
+    picked <- state_1
+    if (!is.null(state_2) && state_2 != "") {
+      picked <- c(state_1, state_2)
+    }
+    
+    # Filter and reshape for plotting ----
     df <- panel_data() %>%
-      filter(state_name == input$state) %>%
-      arrange(year) %>%
+      filter(state_name %in% picked) %>%
+      arrange(state_name, year) %>%
       select(
+        state_name,
         year,
         labor_productivity_index_2007,
         compensation_index = all_of(growth_cfg$comp_col)
       ) %>%
       pivot_longer(
-        cols      = -year,
+        cols      = c(labor_productivity_index_2007,
+                      compensation_index),
         names_to  = "metric",
         values_to = "value"
       ) %>%
@@ -173,6 +194,58 @@ growth_tabs_server <- function(input, output, session,
           compensation_index            = growth_cfg$comp_label
         )
       )
+    
+    # Build a label for each line ----
+    if (length(picked) > 1) {
+      df <- df %>%
+        mutate(line_label = paste(to_title(state_name), "-",
+                                  metric))
+    } else {
+      df <- df %>%
+        mutate(line_label = metric)
+    }
+    
+    # Attach picked states so the plot can use them ----
+    attr(df, "picked") <- picked
+    
+    df
+  })
+  
+  
+  # ---- COMPARISON: Render Line Chart ----
+  output$state_trends <- renderPlot({
+    
+    # Get the data from the button-triggered reactive ----
+    df <- compare_data()
+    req(df)
+    
+    # Pull out which states were picked ----
+    picked <- attr(df, "picked")
+    
+    # Build the title ----
+    chart_title <- if (length(picked) > 1) {
+      paste("Comparison:",
+            to_title(picked[1]), "vs",
+            to_title(picked[2]))
+    } else {
+      paste("State Trend:", to_title(picked[1]))
+    }
+    
+    # Draw the line chart ----
+    ggplot(df, aes(x     = year,
+                   y     = value,
+                   color = line_label)) +
+      geom_line(linewidth = 1.1) +
+      geom_point(size = 1.8) +
+      labs(
+        title    = chart_title,
+        subtitle = "Both series rebased to 2007 = 100",
+        x        = NULL,
+        y        = "Index (2007 = 100)",
+        color    = NULL
+      ) +
+      theme_minimal(base_size = 12)
+  })
     
     # Draw the line chart
     ggplot(df, aes(x = year, y = value, color = metric)) +
