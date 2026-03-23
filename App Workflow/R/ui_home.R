@@ -107,7 +107,8 @@ home_tab <- tabPanel(
                  padding: 30px;
                  border-radius: 8px;
                  border-left: 5px solid #2c3e50;
-                 margin-bottom: 30px;",
+                 margin-bottom: 30px;
+                 text-align: center;",
         h3("About This Project",
            style = "font-family: Georgia, serif;
                     font-weight: bold;
