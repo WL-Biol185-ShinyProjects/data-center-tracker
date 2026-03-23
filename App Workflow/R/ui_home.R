@@ -37,13 +37,14 @@ home_tab <- tabPanel(
     column(
       width = 3,
       div(
-        style = "background-color: #3498db;
+        style = "background-color: #2c3e50;
                  color: white;
                  text-align: center;
                  padding: 20px;
                  border-radius: 8px;
                  margin-bottom: 20px;",
-        h2("50", style = "margin: 0; font-size: 36px;"),
+        h2("50", style = "margin: 0; font-size: 36px;
+                          color: #d4af37;"),
         p("States Covered", style = "margin: 5px 0 0 0;")
       )
     ),
@@ -52,13 +53,14 @@ home_tab <- tabPanel(
     column(
       width = 3,
       div(
-        style = "background-color: #2ecc71;
+        style = "background-color: #2c3e50;
                  color: white;
                  text-align: center;
                  padding: 20px;
                  border-radius: 8px;
                  margin-bottom: 20px;",
-        h2("17", style = "margin: 0; font-size: 36px;"),
+        h2("17", style = "margin: 0; font-size: 36px;
+                          color: #d4af37;"),
         p("Years of Data", style = "margin: 5px 0 0 0;")
       )
     ),
@@ -67,13 +69,14 @@ home_tab <- tabPanel(
     column(
       width = 3,
       div(
-        style = "background-color: #9b59b6;
+        style = "background-color: #2c3e50;
                  color: white;
                  text-align: center;
                  padding: 20px;
                  border-radius: 8px;
                  margin-bottom: 20px;",
-        h2("2007", style = "margin: 0; font-size: 36px;"),
+        h2("2007", style = "margin: 0; font-size: 36px;
+                            color: #d4af37;"),
         p("Data Starts", style = "margin: 5px 0 0 0;")
       )
     ),
@@ -82,13 +85,14 @@ home_tab <- tabPanel(
     column(
       width = 3,
       div(
-        style = "background-color: #e67e22;
+        style = "background-color: #2c3e50;
                  color: white;
                  text-align: center;
                  padding: 20px;
                  border-radius: 8px;
                  margin-bottom: 20px;",
-        h2("2023", style = "margin: 0; font-size: 36px;"),
+        h2("2023", style = "margin: 0; font-size: 36px;
+                            color: #d4af37;"),
         p("Latest Data", style = "margin: 5px 0 0 0;")
       )
     )
@@ -261,7 +265,7 @@ home_tab <- tabPanel(
     column(
       width = 8, offset = 2,
       div(
-        style = "background-color: #f8f9fa;
+        style = "background-color: #f5f0e1;
                  padding: 25px;
                  border-radius: 8px;
                  text-align: center;
@@ -276,7 +280,7 @@ home_tab <- tabPanel(
             width = 4,
             div(
               style = "padding: 10px;",
-              h5("BLS", style = "color: #3498db;
+              h5("BLS", style = "color: #d4af37;
                                  font-weight: bold;"),
               p("State Productivity &",
                 tags$br(),
@@ -288,7 +292,7 @@ home_tab <- tabPanel(
             width = 4,
             div(
               style = "padding: 10px;",
-              h5("BEA", style = "color: #2ecc71;
+              h5("BEA", style = "color: #d4af37;
                                  font-weight: bold;"),
               p("GDP by State",
                 tags$br(),
@@ -300,7 +304,7 @@ home_tab <- tabPanel(
             width = 4,
             div(
               style = "padding: 10px;",
-              h5("CPI", style = "color: #9b59b6;
+              h5("CPI", style = "color: #d4af37;
                                  font-weight: bold;"),
               p("Consumer Price Index",
                 tags$br(),
