@@ -123,9 +123,9 @@ growth_tabs_server <- function(input, output, session,
       geom_polygon(color = "white", linewidth = 0.15) +
       coord_fixed(1.3) +
       scale_fill_gradient2(
-        low      = "#B2182B",
-        mid      = "#F7F7F7",
-        high     = "#2166AC",
+        low      = "#E69F00",  # orange - color blind friendly
+        mid      = "#F5F5F5",  # light grey - neutral midpoint
+        high     = "#0072B2",  # blue - color blind friendly
         midpoint = 0,
         na.value = "grey90",
         labels   = label_number(accuracy = 0.1),
@@ -181,7 +181,7 @@ growth_tabs_server <- function(input, output, session,
       geom_point(size = 1.8) +
       scale_color_manual(
         values = stats::setNames(
-          c("#2166AC", "#B2182B"),
+          c("#0072B2", "#E69F00"),
           c("Labor Productivity", growth_cfg$comp_label)
         )
       ) +
