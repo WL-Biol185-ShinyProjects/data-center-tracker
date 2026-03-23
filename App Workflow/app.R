@@ -40,6 +40,7 @@ source("R/server_levels_tab.R")
 source("R/ui_heatmap.R")
 source("R/server_heatmap_tab.R")
 source("R/ui_outsideUS.R")
+source("R/ui_research.R")
 
 
 # ---- Custom CSS ----
@@ -142,6 +143,7 @@ ui <- navbarPage(
   rankings_tab,
   levels_tab,
   heatmap_tab,
+  research_tab,
   about_tab
 )
 
