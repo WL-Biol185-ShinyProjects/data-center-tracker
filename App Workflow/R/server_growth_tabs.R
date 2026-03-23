@@ -155,22 +155,14 @@ growth_tabs_server <- function(input, output, session,
       )
   })
   
-  
-  # ---- COMPARISON: Render Line Chart ----
-  output$state_trends <- renderPlot({
+  # ---- COMPARISON: Filtered Data (runs on button click) ----
+  compare_data <- eventReactive(input$compare_go, {
     
-    # Wait for the button click ----
-    req(input$compare_go)
-    
-    # Only re-draw when button is clicked ----
-    input$compare_go
-    
-    # Grab state choices inside isolate so they
-    # don't trigger re-draws on their own ----
-    state_1 <- isolate(input$state)
-    state_2 <- isolate(input$state_2)
-    
+    # Grab both state selections ----
+    state_1 <- input$state
+    state_2 <- input$state_2
     req(state_1)
+    
     growth_cfg <- growth_metric_config()
     
     # Decide which states to include ----
@@ -203,7 +195,7 @@ growth_tabs_server <- function(input, output, session,
         )
       )
     
-    # Build a label for each line: State + Metric ----
+    # Build a label for each line ----
     if (length(picked) > 1) {
       df <- df %>%
         mutate(line_label = paste(to_title(state_name), "-",
@@ -212,6 +204,23 @@ growth_tabs_server <- function(input, output, session,
       df <- df %>%
         mutate(line_label = metric)
     }
+    
+    # Attach picked states so the plot can use them ----
+    attr(df, "picked") <- picked
+    
+    df
+  })
+  
+  
+  # ---- COMPARISON: Render Line Chart ----
+  output$state_trends <- renderPlot({
+    
+    # Get the data from the button-triggered reactive ----
+    df <- compare_data()
+    req(df)
+    
+    # Pull out which states were picked ----
+    picked <- attr(df, "picked")
     
     # Build the title ----
     chart_title <- if (length(picked) > 1) {
@@ -236,10 +245,7 @@ growth_tabs_server <- function(input, output, session,
         color    = NULL
       ) +
       theme_minimal(base_size = 12)
-    
-  }) %>%
-    bindEvent(input$compare_go,
-              ignoreNULL = FALSE)
+  })
     
     # Draw the line chart
     ggplot(df, aes(x = year, y = value, color = metric)) +
