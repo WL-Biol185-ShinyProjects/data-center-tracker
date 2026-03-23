@@ -9,7 +9,7 @@ output: html_document
 library(tidyverse)
 library(data.table)
 # This section takes the EU data, cleans it up, and turns it into annual data.
-raw_gdp <- read.csv("App Workflow/data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_46.csv", header = TRUE, na.strings = "")
+raw_gdp <- read.csv("data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_46.csv", header = TRUE, na.strings = "")
 countries <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyrpus", "Czechia", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovak Republic", "Slovenia", "Spain", "Sweden")
 EU_gdps <- raw_gdp %>%
     filter(Country.Name %in% countries) %>%
@@ -26,7 +26,7 @@ colnames(EU_gdps) <- tolower(colnames(EU_gdps))
 
 summary(EU_gdps)
 
-raw_labor <- read.csv("App Workflow/data/ECB_Data Portal_20260316215613.csv", header = TRUE)
+raw_labor <- read.csv("data/ECB_Data Portal_20260316215613.csv", header = TRUE)
 
 
 raw_labor$TIME.PERIOD <- gsub("Q\\d", "", raw_labor$TIME.PERIOD)
@@ -47,7 +47,7 @@ EU_total <- left_join(sumlabor, sumtable)
 
 # Cleanup for fredgraph.csv. Turning data points into annual data.
 
-raw_fred <- read.csv("App Workflow/data/fredgraph.csv")
+raw_fred <- read.csv("data/fredgraph.csv")
 
 raw_fred$observation_date <- substring(raw_fred$observation_date, 1, 4)
 
@@ -64,5 +64,5 @@ fred_annual <- sum_fred %>%
 
 # Tie it allll together
 compare_total <- left_join(EU_total, fred_annual)
-compare_total$avr_gdp <- 
+
 ```
