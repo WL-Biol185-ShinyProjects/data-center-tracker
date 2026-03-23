@@ -87,3 +87,11 @@ levels_metric_choices <- stats::setNames(
   names(levels_metric_labels),   # VALUES = column names (what gets returned)
   unname(levels_metric_labels)   # NAMES  = display labels (what user sees)
 )
+# ---- Load Outside US Data ----  #new EU Data
+load_outside_us_data <- function() {
+  data_path <- file.path("data", "EUdata.csv")
+  if (!file.exists(data_path)) {
+    return(NULL)
+  }
+  read.csv(data_path, stringsAsFactors = FALSE)
+}

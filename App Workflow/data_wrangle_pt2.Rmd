@@ -65,4 +65,6 @@ fred_annual <- sum_fred %>%
 # Tie it allll together
 compare_total <- left_join(EU_total, fred_annual)
 
+write.csv(compare_total, file= "EUdata.csv")
+
 ```
