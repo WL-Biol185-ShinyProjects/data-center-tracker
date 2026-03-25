@@ -30,7 +30,8 @@ growth_tabs_server <- function(input, output, session,
     )
     
     # Fill State 2 dropdown (blank = no second state) ----
-    state_2_choices <- c("" = "", setNames(states, to_title(states)))
+   #(wrong cause there can;t be nothing in "") state_2_choices <- c("" = "", setNames(states, to_title(states)))
+    state_2_choices <- c("a", "b", "c")
     updateSelectInput(
       session, "state_2",
       choices  = state_2_choices,
