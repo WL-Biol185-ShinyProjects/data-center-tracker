@@ -40,7 +40,6 @@ source("R/server_levels_tab.R")
 source("R/ui_heatmap.R")
 source("R/ui_outsideUS.R") #EU Data
 source("R/server_heatmap_tab.R")
-source("R/ui_outsideUS.R")
 source("R/ui_research.R")
 
 
@@ -153,26 +152,20 @@ ui <- navbarPage(
 # ---- Server ----
 server <- function(input, output, session) {
   
-  # Load data once as reactiveVals (same as your original)
-  panel_data  <- reactiveVal(load_panel_data())
-  levels_data <- reactiveVal(load_levels_data())
-  outside_us_data <- reactiveVal(load_outside_us_data())  # add this
+  panel_data      <- reactiveVal(load_panel_data())
+  levels_data     <- reactiveVal(load_levels_data())
+  outside_us_data <- reactiveVal(load_outside_us_data())
   
-  # Growth tabs server (map, comparison, rankings)
   growth_tabs_server(input, output, session,
                      panel_data, levels_data)
-  
-  # Levels tab server
   levels_tab_server(input, output, session,
                     levels_data)
-  # Heat map tab server
   heatmap_tab_server(input, output, session,
                      panel_data)
-  # EU Data Comparison
-  outside_us_data <- reactiveVal(load_outside_us_data())
   outside_us_tab_server(input, output, session,
                         outside_us_data)
 }
+
 
 
 # ---- Run ----

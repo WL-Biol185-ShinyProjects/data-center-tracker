@@ -19,7 +19,6 @@ growth_tabs_server <- function(input, output, session,
   # ---- Fill State Dropdowns ----
   observe({
     df <- panel_data()
-    req(!is.null(df), nrow(df) > 0)
     
     states <- sort(unique(df$state_name))
     
@@ -46,7 +45,6 @@ growth_tabs_server <- function(input, output, session,
     
     years <- sort(unique(growth_df$year))
     
-    # If on Levels tab, narrow years to what has data
     if (identical(input$main_tab, "Levels Comparison") &&
         !is.null(levels_data()) &&
         !is.null(input$levels_metric)) {
@@ -76,9 +74,7 @@ growth_tabs_server <- function(input, output, session,
                       choices = years, selected = selected_year)
   })
   
-  
   # ---- Growth Metric Config ----
-  # Decides which columns to use based on real/nominal toggle
   growth_metric_config <- reactive({
     df <- panel_data()
     req(!is.null(df), nrow(df) > 0)
@@ -89,184 +85,94 @@ growth_tabs_server <- function(input, output, session,
     use_real <- identical(input$growth_wage_basis, "real") && has_real
     
     list(
-      mode       = if (use_real) "real" else "nominal",
-      comp_col   = if (use_real) "hourly_compensation_real_index_2007"
-      else "hourly_compensation_index_2007",
-      gap_col    = if (use_real) "gap_real_index_2007"
-      else if (has_nominal_gap) "gap_nominal_index_2007"
-      else "gap_index_2007",
-      comp_label = if (use_real) "Hourly Compensation (Real)"
-      else "Hourly Compensation (Nominal)",
-      gap_label  = if (use_real) "Real Gap" else "Nominal Gap"
+      mode       = (if (use_real) "real" else "nominal"),
+      comp_col   = (if (use_real) "hourly_compensation_real_index_2007" 
+                    else "hourly_compensation_index_2007"),
+      gap_col    = (if (use_real) "gap_real_index_2007" 
+                    else if (has_nominal_gap) "gap_nominal_index_2007" 
+                    else "gap_index_2007"),
+      comp_label = (if (use_real) "Hourly Compensation (Real)" 
+                    else "Hourly Compensation (Nominal)"),
+      gap_label  = (if (use_real) "Real Gap" else "Nominal Gap")
     )
-  })
+  }) # Added missing closing brace/paren
   
-  
-  # ---- Yearly Data (filtered to selected year) ----
+  # ---- Yearly Data ----
   yearly_data <- reactive({
     req(panel_data(), input$year)
     panel_data() %>% filter(year == input$year)
   })
-  
   
   # ---- MAP: Render Choropleth ----
   output$gap_map <- renderPlot({
     req(yearly_data())
     growth_cfg <- growth_metric_config()
     us_map     <- load_us_map()
-    validate(need(!is.null(us_map),
-                  "Install the `maps` package to see the map."))
+    validate(need(!is.null(us_map), "Install the `maps` package."))
     
-    # Join gap data to map polygons
     map_df <- us_map %>%
       left_join(
         yearly_data() %>%
-          transmute(state_name,
-                    gap_value = .data[[growth_cfg$gap_col]]),
+          transmute(state_name, gap_value = .data[[growth_cfg$gap_col]]),
         by = c("region" = "state_name")
       )
     
-    # Draw the map
     ggplot(map_df, aes(long, lat, group = group, fill = gap_value)) +
       geom_polygon(color = "white", linewidth = 0.15) +
       coord_fixed(1.3) +
-      scale_fill_gradient2(
-        low      = "#E69F00",
-        mid      = "#F5F5F5",
-        high     = "#0072B2",
-        midpoint = 0,
-        na.value = "grey90",
-        labels   = label_number(accuracy = 0.1),
-        name     = "Gap\n(Index pts)"
-      ) +
-      labs(
-        title    = paste0("Productivity-Compensation Gap (",
-                          input$year, ")"),
-        subtitle = paste0(growth_cfg$gap_label,
-                          " = productivity index - compensation index",
-                          " (2007 = 100)"),
-        x = NULL, y = NULL
-      ) +
-      theme_minimal(base_size = 12) +
-      theme(
-        axis.text  = element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid = element_blank()
-      )
+      scale_fill_gradient2(low = "#E69F00", mid = "#F5F5F5", high = "#0072B2", midpoint = 0) +
+      labs(title = paste0("Productivity-Compensation Gap (", input$year, ")"),
+           subtitle = paste0(growth_cfg$gap_label, " (2007 = 100)")) +
+      theme_minimal()
   })
   
-  # ---- COMPARISON: Filtered Data (runs on button click) ----
+  # ---- COMPARISON: Filtered Data ----
   compare_data <- eventReactive(input$compare_go, {
-    
-    # Grab both state selections ----
     state_1 <- input$state
     state_2 <- input$state_2
     req(state_1)
     
     growth_cfg <- growth_metric_config()
-    
-    # Decide which states to include ----
     picked <- state_1
-    if (!is.null(state_2) && state_2 != "") {
-      picked <- c(state_1, state_2)
-    }
+    if (!is.null(state_2) && state_2 != "") picked <- c(state_1, state_2)
     
-    # Filter and reshape for plotting ----
     df <- panel_data() %>%
       filter(state_name %in% picked) %>%
-      arrange(state_name, year) %>%
-      select(
-        state_name,
-        year,
-        labor_productivity_index_2007,
-        compensation_index = all_of(growth_cfg$comp_col)
-      ) %>%
-      pivot_longer(
-        cols      = c(labor_productivity_index_2007,
-                      compensation_index),
-        names_to  = "metric",
-        values_to = "value"
-      ) %>%
-      mutate(
-        metric = recode(
-          metric,
-          labor_productivity_index_2007 = "Labor Productivity",
-          compensation_index            = growth_cfg$comp_label
-        )
-      )
+      select(state_name, year, labor_productivity_index_2007,
+             compensation_index = all_of(growth_cfg$comp_col)) %>%
+      pivot_longer(cols = c(labor_productivity_index_2007, compensation_index),
+                   names_to = "metric", values_to = "value") %>%
+      mutate(metric = recode(metric, 
+                             labor_productivity_index_2007 = "Labor Productivity",
+                             compensation_index = growth_cfg$comp_label))
     
-    # Build a label for each line ----
     if (length(picked) > 1) {
-      df <- df %>%
-        mutate(line_label = paste(to_title(state_name), "-",
-                                  metric))
+      df <- df %>% mutate(line_label = paste(to_title(state_name), "-", metric))
     } else {
-      df <- df %>%
-        mutate(line_label = metric)
+      df <- df %>% mutate(line_label = metric)
     }
-    
-    # Attach picked states so the plot can use them ----
     attr(df, "picked") <- picked
-    
     df
   })
   
-  
-  # ---- COMPARISON: Render Line Chart ----
+  # ---- COMPARISON: Render Plot ----
   output$state_trends <- renderPlot({
-    
-    # Get the data from the button-triggered reactive ----
     df <- compare_data()
     req(df)
-    
-    # Pull out which states were picked ----
     picked <- attr(df, "picked")
     
-    # Build the title ----
     chart_title <- if (length(picked) > 1) {
-      paste("Comparison:",
-            to_title(picked[1]), "vs",
-            to_title(picked[2]))
+      paste("Comparison:", to_title(picked[1]), "vs", to_title(picked[2]))
     } else {
       paste("State Trend:", to_title(picked[1]))
     }
     
-    # Draw the line chart ----
-    ggplot(df, aes(x     = year,
-                   y     = value,
-                   color = line_label)) +
+    ggplot(df, aes(x = year, y = value, color = line_label)) +
       geom_line(linewidth = 1.1) +
       geom_point(size = 1.8) +
-      labs(
-        title    = chart_title,
-        subtitle = "Both series rebased to 2007 = 100",
-        x        = NULL,
-        y        = "Index (2007 = 100)",
-        color    = NULL
-      ) +
-      theme_minimal(base_size = 12)
+      labs(title = chart_title, y = "Index (2007 = 100)", color = NULL) +
+      theme_minimal()
   })
-    
-    # Draw the line chart
-    ggplot(df, aes(x = year, y = value, color = metric)) +
-      geom_line(linewidth = 1.1) +
-      geom_point(size = 1.8) +
-      scale_color_manual(
-        values = stats::setNames(
-          c("#0072B2", "#E69F00"),
-          c("Labor Productivity", growth_cfg$comp_label)
-        )
-      ) +
-      labs(
-        title    = paste("State Trend:", to_title(input$state)),
-        subtitle = "Both series rebased to 2007 = 100",
-        x     = NULL,
-        y     = "Index (2007 = 100)",
-        color = NULL
-      ) +
-      theme_minimal(base_size = 12)
-  })
-  
   
   # ---- RANKINGS: Render Table ----
   output$rank_table <- renderTable({
@@ -275,51 +181,29 @@ growth_tabs_server <- function(input, output, session,
     
     out <- yearly_data() %>%
       transmute(
-        State                    = to_title(state_name),
+        State = to_title(state_name),
         `Productivity (2007=100)` = round(labor_productivity_index_2007, 1),
-        Compensation             = round(.data[[growth_cfg$comp_col]], 1),
-        Gap                      = round(.data[[growth_cfg$gap_col]], 1)
+        Compensation = round(.data[[growth_cfg$comp_col]], 1),
+        Gap = round(.data[[growth_cfg$gap_col]], 1)
       ) %>%
       arrange(desc(Gap))
     
-    # Rename compensation column to include real/nominal label
     names(out)[3] <- paste0(growth_cfg$comp_label, " (2007=100)")
     out
   })
   
-  
   # ---- Download Handlers ----
   output$download_gap_map <- downloadHandler(
-    filename = function() {
-      sprintf("gap_map_%s_%s.csv", input$growth_wage_basis, input$year)
-    },
-    content = function(file) {
-      write.csv(yearly_data(), file, row.names = FALSE)
-    }
+    filename = function() sprintf("gap_map_%s_%s.csv", input$growth_wage_basis, input$year),
+    content = function(file) write.csv(yearly_data(), file, row.names = FALSE)
   )
   
   output$download_state_trends <- downloadHandler(
-    filename = function() {
-      sprintf("state_trend_%s_%s.csv", input$state, input$growth_wage_basis)
-    },
-    content = function(file) {
-      df <- panel_data() %>%
-        filter(state_name == input$state)
-      write.csv(df, file, row.names = FALSE)
-    }
+    filename = function() sprintf("state_trend_%s.csv", input$state),
+    content = function(file) write.csv(panel_data() %>% filter(state_name == input$state), file, row.names = FALSE)
   )
   
-  output$download_rankings <- downloadHandler(
-    filename = function() {
-      sprintf("gap_rankings_%s_%s.csv", input$growth_wage_basis, input$year)
-    },
-    content = function(file) {
-      write.csv(yearly_data(), file, row.names = FALSE)
-    }
-  )
-  
-  
-  # ---- Return shared reactives for Levels tab to use ----
+  # ---- Return reactives ----
   return(list(
     growth_metric_config = growth_metric_config,
     yearly_data          = yearly_data
