@@ -67,30 +67,32 @@ outside_us_tab_server <- function(input, output, session,
     validate(need(nrow(df_long) > 0, "No data available for selected series."))
     
     # -- Draw the line chart --
+    # Use facet_wrap so each series gets its own y-axis scale.
+    # This prevents EU GDP per Capita from squashing the others.
     ggplot(df_long, aes(x = year, y = value,
                         color = series, group = series)) +
       geom_line(linewidth = 1.1) +
       geom_point(size = 2) +
       scale_color_manual(values = series_colors) +
-      scale_x_continuous(breaks = seq(1995, 2023, by = 2)) +
+      scale_x_continuous(breaks = seq(1995, 2023, by = 4)) +
+      facet_wrap(~ series, scales = "free_y") +
       labs(
         title    = "EU Productivity vs. US Compensation Over Time",
         subtitle = paste0(input$outside_year_range[1],
                           " - ", input$outside_year_range[2]),
         x        = "Year",
-        y        = "Index Value",
-        color    = "Series"
+        y        = "Index Value"
       ) +
       theme_minimal(base_size = 13) +
       theme(
-        plot.title   = element_text(family = "Georgia",
-                                    face   = "bold",
-                                    size   = 14),
-        axis.text    = element_text(color = "black"),
-        axis.title   = element_text(color = "black"),
-        legend.title = element_text(color = "black"),
-        legend.text  = element_text(color = "black"),
-        panel.grid.minor = element_blank()
+        plot.title       = element_text(family = "Georgia",
+                                        face   = "bold",
+                                        size   = 14),
+        axis.text        = element_text(color = "black"),
+        axis.title       = element_text(color = "black"),
+        legend.position  = "none",
+        panel.grid.minor = element_blank(),
+        strip.text       = element_text(face = "bold", size = 11)
       )
   })
   
