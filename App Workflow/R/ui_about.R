@@ -142,7 +142,7 @@ about_tab <- tabPanel(
             tags$li(tags$a(href = "https://www.bls.gov/cew/", "BLS QCEW")),
             tags$li(tags$a(href = "https://www.bea.gov/data/gdp/gdp-state", "BEA GDP by State")),
             tags$li(tags$a(href = "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area", "BEA Regional Price Parities (Accessed March 18)")),
-            tags$li(tags$a(href = "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?end=2024&locations=EU&start=1960&view=chart", "EU GDP Data (Accessed March 18" )),
+            tags$li(tags$a(href = "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD", "EU GDP Data (Accessed March 18" )),
             tags$li(tags$a(href = "https://data.ecb.europa.eu/data/datasets/MNA/MNA.Q.Y.I9.W0.S1.S1._Z.LPR_HW._Z.OTQ._Z.IX.LR.N", "EU Worker Productivity (Accessed March 18)")),
             tags$li(tags$a(href = "https://fred.stlouisfed.org/graph/?g=11CrY&utm_source=direct&utm_medium=exported-chart&utm_campaign=myfred_referrer","Data for US Worker Productivity and Indexed Compensation (Accessed March 18)")),
           )

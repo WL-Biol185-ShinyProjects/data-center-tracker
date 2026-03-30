@@ -42,6 +42,8 @@ Canonical source links:
 - BEA RPP zip used in ETL: https://apps.bea.gov/regional/zip/RPP.zip
 - BLS QCEW annual singlefile zip (first year used): https://data.bls.gov/cew/data/files/2008/csv/2008_annual_singlefile.zip
 - BLS QCEW annual singlefile zip (latest year used): https://data.bls.gov/cew/data/files/2024/csv/2024_annual_singlefile.zip
+- EU Worker Productivity European Central Bank (Accessed March 18 2026): https://data.ecb.europa.eu/data/datasets/MNA/MNA.Q.Y.I9.W0.S1.S1._Z.LPR_HW._Z.OTQ._Z.IX.LR.N
+- EU GDP Data World Bank Data (Accessed March 18 2026): https://data.worldbank.org/indicator/NY.GDP.PCAP.CD
 
 ## Methods (Step By Step)
 
