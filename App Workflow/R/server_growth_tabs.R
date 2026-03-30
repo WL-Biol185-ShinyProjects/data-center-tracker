@@ -34,8 +34,8 @@ growth_tabs_server <- function(input, output, session,
     state_2_choices <- c("a", "b", "c")
     updateSelectInput(
       session, "state_2",
-      choices  = state_2_choices,
-      selected = ""
+      choices  = setNames(states, to_title(states)),
+      selected = if ("california" %in% states) "california" else states[1]
     )
   })
   
