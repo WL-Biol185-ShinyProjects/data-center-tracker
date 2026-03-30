@@ -31,11 +31,11 @@ growth_tabs_server <- function(input, output, session,
     
     # Fill State 2 dropdown (blank = no second state) ----
    #(wrong cause there can;t be nothing in "") state_2_choices <- c("" = "", setNames(states, to_title(states)))
-    state_2_choices <- c("a", "b", "c")
+    state_2_choices <- setNames(states, to_title(states))
     updateSelectInput(
       session, "state_2",
-      choices  = setNames(states, to_title(states)),
-      selected = if ("california" %in% states) "california" else states[1]
+      choices  = state_2_choices,
+      selected = states[1]
     )
   })
   
