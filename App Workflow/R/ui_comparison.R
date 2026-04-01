@@ -28,7 +28,7 @@ comparison_tab <- tabPanel(
         # Second state dropdown (filled by server) ----
         selectInput(
           inputId  = "state_2",
-          label    = "State 2 (optional):",
+          label    = "State 2:",
           choices  = NULL
         ),
         
@@ -43,8 +43,7 @@ comparison_tab <- tabPanel(
         
         tags$small(
           class = "text-muted",
-          "Uses the wage basis selected on the Map View tab.
-           Leave State 2 blank to show one state only."
+          "Uses the wage basis selected on the Map View tab."
         )
       )
     ),
@@ -58,3 +57,4 @@ comparison_tab <- tabPanel(
     )
   )
 )
+
