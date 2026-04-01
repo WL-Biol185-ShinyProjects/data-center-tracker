@@ -319,7 +319,82 @@ research_tab <- tabPanel(
     )
   ),
   
-  # ---- Section 7: AI and the Future of the Gap ----
+  # ---- Section 7: A Global Perspective: EU vs. U.S. ----
+  fluidRow(
+    column(
+      width = 8, offset = 2,
+      div(
+        style = "background-color: #eae4d8;
+                 padding: 25px;
+                 border-radius: 8px;
+                 border-left: 5px solid #c8a96e;
+                 margin-bottom: 25px;",
+        h3("A Global Perspective: EU vs. U.S.",
+           style = "font-family: Georgia, serif;
+                    color: #1a2744;
+                    margin-top: 0;"),
+        p(tags$em("Backs: Outside US"),
+          style = "color: #6c757d;
+                   font-size: 13px;
+                   margin-bottom: 15px;"),
+        p("Is the productivity-wage decoupling
+           uniquely American? The Outside US tab
+           compares four series from 2000 to 2023:
+           EU GDP per capita and EU labor
+           productivity alongside U.S. compensation
+           and U.S. labor productivity."),
+        p("U.S. labor productivity rose from an
+           index of about 177 in 2000 to 274 by
+           2023. U.S. compensation grew much more
+           slowly, from roughly 128 to 154. That
+           widening gap is the core pattern this
+           dashboard documents."),
+        p("EU labor productivity stayed remarkably
+           flat near an index of 100 over the same
+           period. EU GDP per capita nearly tripled
+           in nominal dollar terms, but that
+           reflects price changes and economic
+           expansion rather than a per-worker
+           productivity surge like in the U.S."),
+        p("The tab uses faceted panels with
+           independent y-axes because the series
+           operate on very different scales (raw
+           dollars in the tens of thousands vs.
+           index values near 100-274). This
+           prevents one series from visually
+           overwhelming the others."),
+        p(
+          tags$em("Data sources: "),
+          tags$a(
+            href = "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?locations=EU",
+            target = "_blank",
+            "World Bank - EU GDP per Capita"
+          ),
+          " | ",
+          tags$a(
+            href = "https://data.ecb.europa.eu/data/data-categories/prices-macroeconomic-and-sectoral-statistics/labour-market/labour-productivity-and-unit-labour-costs/labour-productivity",
+            target = "_blank",
+            "ECB - Labour Productivity"
+          ),
+          " | ",
+          tags$a(
+            href = "https://fred.stlouisfed.org/series/COMPRNFB",
+            target = "_blank",
+            "FRED - Compensation"
+          ),
+          " | ",
+          tags$a(
+            href = "https://fred.stlouisfed.org/series/OPHNFB",
+            target = "_blank",
+            "FRED - Productivity"
+          ),
+          style = "font-size: 12px; color: #6c757d;"
+        )
+      )
+    )
+  ),
+  
+  # ---- Section 8: AI and the Future of the Gap ----
   fluidRow(
     column(
       width = 8, offset = 2,
@@ -434,6 +509,11 @@ research_tab <- tabPanel(
           "Retrieved from epi.org.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
+        p("European Central Bank. (2025).",
+          tags$em("Labour Productivity Data Portal."),
+          "ECB Statistical Data Warehouse.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
         p("Gimbel, M. (2026).",
           tags$em("An AI Productivity Boom? Don't Count
                    Your (Productivity Data) Chickens."),
@@ -464,6 +544,12 @@ research_tab <- tabPanel(
           tags$em("Pay, Productivity, and the
                    Labor Share."),
           "Medium.",
+          style = "font-size: 13px;
+                   margin-bottom: 8px;"),
+        p("World Bank. (2024).",
+          tags$em("GDP per capita (current US$) -
+                   European Union."),
+          "World Development Indicators.",
           style = "font-size: 13px;
                    margin-bottom: 8px;")
       )
