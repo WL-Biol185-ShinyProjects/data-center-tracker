@@ -139,11 +139,11 @@ ui <- navbarPage(
   
   home_tab,
   map_tab,
-  outside_us_tab,
   comparison_tab,
   rankings_tab,
   levels_tab,
   heatmap_tab,
+  outside_us_tab,
   research_tab,
   about_tab
 )
