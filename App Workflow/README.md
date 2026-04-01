@@ -12,6 +12,11 @@ https://jacksonmaroon.shinyapps.io/productivity-vs-wages-atlas/
 - Cesar
 - Thomas
 
+## AI  Acknowledgment
+
+This project used Claude (Anthropic) as an AI assistant during development.
+
+
 ## What This Project Measures
 
 Core question:
