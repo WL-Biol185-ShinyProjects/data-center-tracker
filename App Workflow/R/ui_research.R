@@ -319,7 +319,7 @@ research_tab <- tabPanel(
     )
   ),
   
-  # ---- Section 7: A Global Perspective: EU vs. U.S. ----
+  # ---- Outside US tab ----
   fluidRow(
     column(
       width = 8, offset = 2,
@@ -339,54 +339,58 @@ research_tab <- tabPanel(
                    margin-bottom: 15px;"),
         p("Is the productivity-wage decoupling
            uniquely American? The Outside US tab
-           compares four series from 2000 to 2023:
-           EU GDP per capita and EU labor
-           productivity alongside U.S. compensation
-           and U.S. labor productivity."),
-        p("U.S. labor productivity rose from an
-           index of about 177 in 2000 to 274 by
-           2023. U.S. compensation grew much more
-           slowly, from roughly 128 to 154. That
-           widening gap is the core pattern this
-           dashboard documents."),
-        p("EU labor productivity stayed remarkably
-           flat near an index of 100 over the same
-           period. EU GDP per capita nearly tripled
-           in nominal dollar terms, but that
-           reflects price changes and economic
-           expansion rather than a per-worker
-           productivity surge like in the U.S."),
-        p("The tab uses faceted panels with
-           independent y-axes because the series
-           operate on very different scales (raw
-           dollars in the tens of thousands vs.
-           index values near 100-274). This
-           prevents one series from visually
-           overwhelming the others."),
+           places U.S. trends alongside European
+           data to explore this question."),
+        p("A landmark 2008 study by van Ark,
+           O'Mahony, and Timmer in the Journal of
+           Economic Perspectives documented that
+           since the mid-1990s, European labor
+           productivity growth slowed significantly
+           while U.S. productivity accelerated.
+           They attributed the divergence to the
+           slower emergence of the knowledge economy
+           in Europe: lower investment in information
+           and communications technology, a smaller
+           share of ICT-producing industries, and
+           slower multifactor productivity growth.
+           European labor market rigidities and
+           higher product market regulation also
+           played a role."),
+        p("The ECB confirmed in 2024 that this gap
+           has persisted and widened. Between late
+           2019 and mid-2024, U.S. labor productivity
+           per hour grew by 6.7% while the euro area
+           managed only 0.9%. The ECB found the gap
+           was broadly based across sectors, but
+           especially large in information and
+           communications (27.2% U.S. growth vs.
+           3.8% in the euro area) and professional
+           services. They identified both cyclical
+           factors (different pandemic labor market
+           responses) and structural factors
+           (insufficient ICT and intangible capital
+           investment in Europe)."),
+        p("Our Outside US tab visualizes this
+           transatlantic divide. EU labor productivity
+           hovered near an index of 100 for the
+           entire 2000-2023 period while U.S.
+           productivity climbed steadily. The tab
+           uses faceted panels with independent
+           y-axes because the series operate on
+           very different scales."),
         p(
-          tags$em("Data sources: "),
+          tags$em("Sources: "),
           tags$a(
-            href = "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?locations=EU",
+            href = "https://doi.org/10.1257/jep.22.1.25",
             target = "_blank",
-            "World Bank - EU GDP per Capita"
+            "van Ark et al. (2008), Journal
+             of Economic Perspectives"
           ),
           " | ",
           tags$a(
-            href = "https://data.ecb.europa.eu/data/data-categories/prices-macroeconomic-and-sectoral-statistics/labour-market/labour-productivity-and-unit-labour-costs/labour-productivity",
+            href = "https://www.ecb.europa.eu/press/economic-bulletin/focus/2024/html/ecb.ebbox202406_01~9c8418b554.en.html",
             target = "_blank",
-            "ECB - Labour Productivity"
-          ),
-          " | ",
-          tags$a(
-            href = "https://fred.stlouisfed.org/series/COMPRNFB",
-            target = "_blank",
-            "FRED - Compensation"
-          ),
-          " | ",
-          tags$a(
-            href = "https://fred.stlouisfed.org/series/OPHNFB",
-            target = "_blank",
-            "FRED - Productivity"
+            "ECB Economic Bulletin (2024)"
           ),
           style = "font-size: 12px; color: #6c757d;"
         )
@@ -509,9 +513,11 @@ research_tab <- tabPanel(
           "Retrieved from epi.org.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
-        p("European Central Bank. (2025).",
-          tags$em("Labour Productivity Data Portal."),
-          "ECB Statistical Data Warehouse.",
+        p("European Central Bank. (2024).",
+          tags$em("Labour productivity growth in the
+                   euro area and the United States:
+                   short and long-term developments."),
+          "ECB Economic Bulletin, Issue 6/2024.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
         p("Gimbel, M. (2026).",
@@ -546,10 +552,13 @@ research_tab <- tabPanel(
           "Medium.",
           style = "font-size: 13px;
                    margin-bottom: 8px;"),
-        p("World Bank. (2024).",
-          tags$em("GDP per capita (current US$) -
-                   European Union."),
-          "World Development Indicators.",
+        p("van Ark, B., O'Mahony, M., & Timmer, M.P.
+           (2008).",
+          tags$em("The Productivity Gap between Europe
+                   and the United States: Trends and
+                   Causes."),
+          "Journal of Economic Perspectives, 22(1),
+           25-44.",
           style = "font-size: 13px;
                    margin-bottom: 8px;")
       )
