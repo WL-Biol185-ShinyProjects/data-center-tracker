@@ -194,9 +194,14 @@ growth_tabs_server <- function(input, output, session,
   })
   
   # ---- Download Handlers ----
-  output$download_gap_map <- downloadHandler(
-    filename = function() sprintf("gap_map_%s_%s.csv", input$growth_wage_basis, input$year),
-    content = function(file) write.csv(yearly_data(), file, row.names = FALSE)
+  output$download_rankings <- downloadHandler(
+    filename = function() {
+      paste0("gap_rankings_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      req(yearly_data())
+      write.csv(yearly_data(), file, row.names = FALSE)
+    }
   )
   
   output$download_state_trends <- downloadHandler(
