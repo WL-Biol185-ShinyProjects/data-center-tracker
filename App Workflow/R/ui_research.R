@@ -370,14 +370,6 @@ research_tab <- tabPanel(
            responses) and structural factors
            (insufficient ICT and intangible capital
            investment in Europe)."),
-        p("Our Outside US tab visualizes this
-           transatlantic divide. EU labor productivity
-           hovered near an index of 100 for the
-           entire 2000-2023 period while U.S.
-           productivity climbed steadily. The tab
-           uses faceted panels with independent
-           y-axes because the series operate on
-           very different scales."),
         p(
           tags$em("Sources: "),
           tags$a(
