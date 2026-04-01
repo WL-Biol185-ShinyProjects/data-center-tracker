@@ -319,7 +319,7 @@ research_tab <- tabPanel(
     )
   ),
   
-  # ---- Outside US tab ----
+  # ---- Section 7: A Global Perspective: EU vs. U.S.----
   fluidRow(
     column(
       width = 8, offset = 2,
