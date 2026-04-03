@@ -121,14 +121,20 @@ growth_tabs_server <- function(input, output, session,
     ggplot(map_df, aes(long, lat, group = group, fill = gap_value)) +
       geom_polygon(color = "white", linewidth = 0.15) +
       coord_fixed(1.3) +
-      scale_fill_gradient2(low = "#E69F00", mid = "#F5F5F5", high = "#0072B2", midpoint = 0) +
+      scale_fill_gradient2(
+        low = "#E69F00",
+        mid = "#F5F5F5",
+        high = "#0072B2",
+        midpoint = 0,
+        name = growth_cfg$gap_label
+      ) +
       labs(title = paste0("Productivity-Compensation Gap (", input$year, ")"),
            subtitle = paste0(growth_cfg$gap_label, " (2007 = 100)")) +
       theme_minimal()
   })
   
   # ---- COMPARISON: Filtered Data ----
-  compare_data <- eventReactive(input$compare_go, {
+  compare_data <- reactive({
     state_1 <- input$state
     state_2 <- input$state_2
     req(state_1)

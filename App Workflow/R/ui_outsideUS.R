@@ -2,18 +2,16 @@
 # ui_outsideUS.R - Outside US Comparison Tab (UI only)
 # ============================================================
 # Owner: [PERSON - assign name here]
-# Compares EU productivity vs US compensation over time.
+# Compares EU and U.S. productivity/pay context over time.
 # Data sources: World Bank GDP, ECB Labor Productivity, FRED.
 # Server logic goes in server_outsideUS_tab.R
 # ============================================================
-
-read.csv("EUdata.csv")
 
 outside_us_tab <- tabPanel(
   "Outside US",
   
   # ---- Tab heading ----
-  h3("Global Comparison: EU Productivity vs. US Compensation",
+  h3("Global Comparison: EU Productivity vs. U.S. Compensation",
      style = "font-family: Georgia, serif;"),
   tags$hr(),
   
@@ -54,8 +52,9 @@ outside_us_tab <- tabPanel(
         
         tags$small(
           class = "text-muted",
-          "EU data: World Bank GDP + ECB Labor Productivity.
-           US data: FRED compensation and productivity indices."
+          "This tab gives international context. It does not compare perfectly
+           equivalent measures, but it helps show whether the U.S. decoupling story
+           looks unique or part of a broader pattern."
         )
       )
     ),
@@ -66,6 +65,14 @@ outside_us_tab <- tabPanel(
       
       # -- Main line chart --
       plotOutput("outside_us_plot", height = "420px"),
+
+      tags$p(
+        class = "text-muted",
+        "EU lines summarize broader European output and productivity context,
+         while the U.S. lines track compensation and productivity indices.
+         Read this as a framing comparison, not a causal apples-to-apples test.",
+        style = "margin-top: 10px;"
+      ),
       
       tags$br(),
       

@@ -20,6 +20,14 @@ rankings_tab <- tabPanel(
     column(
       width = 3,
       wellPanel(
+        p(
+          strong("Question answered:"),
+          " which states are furthest apart once we rank them by the selected year's gap?"
+        ),
+        p(
+          strong("What this table shows:"),
+          " the same indexed measures used in the map, but sorted from largest gap to smallest for easier comparison and citation."
+        ),
         tags$small(
           class = "text-muted",
           "Uses the year and wage basis selected on the Map View tab.

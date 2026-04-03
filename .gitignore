@@ -1,4 +1,6 @@
 *.Rproj*
+# macOS Finder metadata
+.DS_Store
 # History files
 .Rhistory
 .Rapp.history

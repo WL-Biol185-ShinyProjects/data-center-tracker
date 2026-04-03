@@ -19,6 +19,14 @@ map_tab <- tabPanel(
     column(
       width = 3,
       wellPanel(
+        p(
+          strong("Question answered:"),
+          " Which states have the largest productivity-compensation gap in a selected year?"
+        ),
+        p(
+          strong("What this map shows:"),
+          " the selected year's gap, defined as the productivity index minus the compensation index after both are rebased to 2007 = 100."
+        ),
 
         # Year dropdown (filled by server)
         selectInput(
@@ -40,7 +48,7 @@ map_tab <- tabPanel(
 
         tags$small(
           class = "text-muted",
-          "Growth tabs use indices rebased to 2007 = 100."
+          "Blue states have productivity outpacing compensation by more; orange states have smaller or negative gaps."
         )
       )
     ),
@@ -49,6 +57,11 @@ map_tab <- tabPanel(
     column(
       width = 9,
       plotOutput("gap_map", height = "550px"),
+      tags$p(
+        class = "text-muted",
+        "Use this view to answer the broadest version of the research question: where is decoupling most visible right now?",
+        style = "margin-top: 10px;"
+      ),
       tags$br(),
       downloadButton("download_gap_map", "Download Map Data (CSV)")
     )

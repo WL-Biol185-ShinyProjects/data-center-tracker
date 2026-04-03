@@ -2,6 +2,15 @@
 
 State-by-state Shiny atlas for comparing productivity and wages in the U.S.
 
+Active app entrypoint:
+`App Workflow/app.R`
+
+Active app data directory:
+`App Workflow/data/`
+
+Note:
+The repo still contains some root-level legacy files from the earlier layout. The current Shiny app lives in `App Workflow/`, and the ETL scripts now sync refreshed outputs into that folder so local refreshes update the app people are actually running.
+
 Live app:
 https://jacksonmaroon.shinyapps.io/productivity-vs-wages-atlas/
 
@@ -33,7 +42,7 @@ All numeric values come from public government datasets. The ETL scripts are det
 
 | Metric family | Exact dataset endpoints used | Pull path in this repo | Pull date used for current committed snapshot | Years in current app data | Geography |
 |---|---|---|---|---|---|
-| Labor productivity, hourly compensation, unit labor cost + GDP deflator | FRED CSV API endpoints used directly in ETL: `https://fred.stlouisfed.org/graph/fredgraph.csv?id=<SERIES_ID>` and GDP deflator `https://fred.stlouisfed.org/graph/fredgraph.csv?id=A191RD3A086NBEA` | `data-raw/run_all.R` using helpers in `R/helpers.R` | 2026-03-04 (fresh pull during `run_all.R`) | 2007-2024 | 50 states + DC |
+| Labor productivity, hourly compensation, unit labor cost + GDP deflator | FRED CSV API endpoints used directly in ETL: `https://fred.stlouisfed.org/graph/fredgraph.csv?id=<SERIES_ID>` and GDP deflator `https://fred.stlouisfed.org/graph/fredgraph.csv?id=A191RD3A086NBEA` | `data-raw/run_all.R` using helpers in `data-raw/helpers_etl.R` | 2026-03-04 (fresh pull during `run_all.R`) | 2007-2024 | 50 states + DC |
 | State GDP and state employment | BEA regional zip: `https://apps.bea.gov/regional/zip/SASUMMARY.zip`, member file `SASUMMARY__ALL_AREAS_1998_2024.csv`, line codes used: `1` (real GDP), `15` (total employment jobs) | `data-raw/run_levels_all.R` | 2026-02-18 (cached input used in current build) | 2008-2024 | 50 states + DC |
 | Private-sector wages | BLS QCEW annual singlefile zips: `https://data.bls.gov/cew/data/files/<YEAR>/csv/<YEAR>_annual_singlefile.zip` for years 2008-2024; row filter applied in ETL: state-level `area_fips` ending `000`, `own_code=5` (private), `industry_code=10` (all industries) | `data-raw/run_levels_all.R` | 2026-02-18 (cached input used in current build) | 2008-2024 | 50 states + DC |
 | Regional price parity adjustment | BEA regional zip: `https://apps.bea.gov/regional/zip/RPP.zip`, member file `SARPP_STATE_2008_2023.csv`, line code used: `5` (all items RPP) | `data-raw/run_levels_all.R` | 2026-02-18 (cached input used in current build) | 2008-2023 in source file; app currently serves years with available joined data | 50 states + DC |
@@ -52,7 +61,7 @@ Canonical source links:
 
 ## Methods (Step By Step)
 
-### 1) Growth/index panel (`data/state_panel.csv`)
+### 1) Growth/index panel (`App Workflow/data/state_panel.csv`)
 
 Pipeline:
 
@@ -72,9 +81,9 @@ Key script:
 - `data-raw/run_all.R`
 
 Key output:
-- `data/state_panel.csv`
+- `App Workflow/data/state_panel.csv`
 
-### 2) Levels panel (`data/state_levels_panel.csv`)
+### 2) Levels panel (`App Workflow/data/state_levels_panel.csv`)
 
 Pipeline:
 
@@ -92,14 +101,14 @@ Key script:
 - `data-raw/run_levels_all.R`
 
 Key output:
-- `data/state_levels_panel.csv`
+- `App Workflow/data/state_levels_panel.csv`
 
 Additional deterministic outputs written by ETL:
 
-- `data/state_metrics_long.csv` (growth long-form series by metric/state/year)
-- `data/series_catalog.csv` (all deterministic FRED series IDs used)
-- `data/qcew_state_private_wages.csv` (filtered QCEW private all-industry state rows)
-- `data/state_levels_long.csv` (levels long-form series by metric/state/year)
+- `App Workflow/data/state_metrics_long.csv` (growth long-form series by metric/state/year)
+- `App Workflow/data/series_catalog.csv` (all deterministic FRED series IDs used)
+- `App Workflow/data/qcew_state_private_wages.csv` (filtered QCEW private all-industry state rows)
+- `App Workflow/data/state_levels_long.csv` (levels long-form series by metric/state/year)
 
 ## Variable Dictionary (Main App Metrics)
 
@@ -123,7 +132,7 @@ You can reproduce this project in two ways:
 
 ### A) Reproduce the deployed app exactly (recommended for grading demos)
 
-This uses committed `data/*.csv` files (same mode as deployment).
+This uses committed `App Workflow/data/*.csv` files (same mode as deployment).
 
 1. Install packages:
 
@@ -134,7 +143,7 @@ install.packages(c("shiny", "dplyr", "tidyr", "ggplot2", "maps", "scales", "plot
 2. Run app:
 
 ```bash
-Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
+Rscript -e 'shiny::runApp("App Workflow", launch.browser = TRUE)'
 ```
 
 ### B) Rebuild data from upstream public sources
@@ -153,16 +162,10 @@ Rscript data-raw/run_all.R
 Rscript data-raw/run_levels_all.R
 ```
 
-3. Run helper tests:
+3. Quick output sanity check:
 
 ```bash
-Rscript -e 'testthat::test_dir("tests/testthat")'
-```
-
-4. Quick output sanity check:
-
-```bash
-Rscript -e 'p<-read.csv("data/state_panel.csv"); l<-read.csv("data/state_levels_panel.csv"); cat("state_panel:",nrow(p),"rows | years",min(p$year),"-",max(p$year),"| states",length(unique(p$state_abbr)),"\n"); cat("state_levels_panel:",nrow(l),"rows | years",min(l$year),"-",max(l$year),"| states",length(unique(l$state_abbr)),"\n")'
+Rscript -e 'p<-read.csv("App Workflow/data/state_panel.csv"); l<-read.csv("App Workflow/data/state_levels_panel.csv"); cat("state_panel:",nrow(p),"rows | years",min(p$year),"-",max(p$year),"| states",length(unique(p$state_abbr)),"\n"); cat("state_levels_panel:",nrow(l),"rows | years",min(l$year),"-",max(l$year),"| states",length(unique(l$state_abbr)),"\n")'
 ```
 
 Current data snapshot in this repo (as checked on 2026-03-04):
@@ -214,7 +217,7 @@ git pull origin main
 3. Start the app:
 
 ```bash
-Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
+Rscript -e 'shiny::runApp("App Workflow", launch.browser = TRUE)'
 ```
 
 4. Open the app from the RStudio `Viewer` pane (or the URL shown in console).
@@ -250,10 +253,10 @@ Rscript -e 'shiny::runApp("app.R", launch.browser = TRUE)'
 
 ```text
 .
-├── app.R
-├── R/helpers.R
-├── data/
+├── App Workflow/
+│   ├── app.R
+│   ├── R/
+│   └── data/
 ├── data-raw/
-├── tests/
 └── deliverables/
 ```

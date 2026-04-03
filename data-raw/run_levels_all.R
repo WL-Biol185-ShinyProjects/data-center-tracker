@@ -12,7 +12,7 @@ script_dir <- dirname(normalizePath(script_path))
 project_root <- normalizePath(file.path(script_dir, ".."))
 setwd(project_root)
 
-source(file.path("R", "helpers.R"))
+source(file.path("data-raw", "helpers_etl.R"))
 
 start_year <- 2008L
 end_year <- 2024L
@@ -170,11 +170,12 @@ state_levels_long <- state_levels_panel %>%
     values_to = "value"
   )
 
-dir.create("data", showWarnings = FALSE, recursive = TRUE)
-write.csv(qcew_state, file.path("data", "qcew_state_private_wages.csv"), row.names = FALSE)
-write.csv(state_levels_panel, file.path("data", "state_levels_panel.csv"), row.names = FALSE)
-write.csv(state_levels_long, file.path("data", "state_levels_long.csv"), row.names = FALSE)
+output_dir <- file.path("App Workflow", "data")
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+write.csv(qcew_state, file.path(output_dir, "qcew_state_private_wages.csv"), row.names = FALSE)
+write.csv(state_levels_panel, file.path(output_dir, "state_levels_panel.csv"), row.names = FALSE)
+write.csv(state_levels_long, file.path(output_dir, "state_levels_long.csv"), row.names = FALSE)
 
 message("Done.")
-message(sprintf("Rows in state_levels_panel.csv: %s", nrow(state_levels_panel)))
-message(sprintf("Rows in state_levels_long.csv: %s", nrow(state_levels_long)))
+message(sprintf("Rows in App Workflow/data/state_levels_panel.csv: %s", nrow(state_levels_panel)))
+message(sprintf("Rows in App Workflow/data/state_levels_long.csv: %s", nrow(state_levels_long)))

@@ -27,23 +27,22 @@ about_tab <- tabPanel(
         column(
           width = 8,
           h3("Project Motivation", style = "font-family: Georgia, serif;"),
-          p("For decades, the relationship between how much workers produce and how much they are paid 
-             has been a central question in American economics. This dashboard was developed to 
-             visualize these trends at the state level, allowing users to investigate whether the 
-             'productivity-pay gap' is a uniform national phenomenon or if it varies significantly 
-             by regional geography and local industry composition."),
-          p("By comparing Bureau of Labor Statistics (BLS) productivity indices with real hourly 
-             compensation, this tool provides a descriptive look at labor's share of economic growth 
-             since 2007.")
+          p("For decades, economists have asked whether workers are being paid in line with what they produce.
+             This project brings that national debate down to the state level."),
+          p("The app uses two complementary data frames: a growth frame that compares indexed productivity
+             and compensation over time, and a levels frame that compares GDP per job to wages across states.
+             Together, those views let us ask not only whether the gap exists, but where it is largest,
+             how it changes, and whether high-output states also deliver high pay.")
         ),
         column(
           width = 4,
           wellPanel(
-            h4("Key Metrics", style = "font-family: Georgia, serif;"),
+            h4("How the Visuals Answer the Question", style = "font-family: Georgia, serif;"),
             tags$ul(
-              tags$li(strong("Gap Metric:"), "Productivity Index - Compensation Index."),
-              tags$li(strong("Levels Ratio:"), "Real pay (QCEW) / Real GDP per job (BEA)."),
-              tags$li(strong("Baseline:"), "All trends rebased to 2007 = 100.")
+              tags$li(strong("Map View:"), "shows where the gap is largest in a selected year."),
+              tags$li(strong("State Comparison:"), "shows whether the gap widens or narrows over time."),
+              tags$li(strong("Gap Rankings:"), "turns the map into an ordered comparison table."),
+              tags$li(strong("Levels Comparison:"), "tests whether high-productivity states also show high pay.")
             )
           )
         )
@@ -151,9 +150,9 @@ about_tab <- tabPanel(
           width = 6,
           h4("Methods & Limitations", style = "font-family: Georgia, serif;"),
           tags$small(
-            p("Real wages are calculated using the BEA Regional Price Parity (RPP) to account for 
-               state-level inflation. GDP per job is derived from BEA total-economy data."),
-            p("Note: These are descriptive cross-state signals, not causal claims.")
+            p("Growth tabs use indices rebased to 2007 = 100, so they emphasize divergence over time rather than absolute dollar levels."),
+            p("Levels tabs use BEA GDP per job and QCEW wages, with real wage measures adjusted by BEA Regional Price Parities (RPP)."),
+            p("These charts are descriptive rather than causal. They show where pay and output move together or apart, but they do not prove why.")
           )
         )
       ),
