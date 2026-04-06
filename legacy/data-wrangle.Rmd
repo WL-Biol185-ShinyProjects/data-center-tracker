@@ -3,6 +3,9 @@ title: "data-wrangle"
 output: html_document
 ---
 
+This notebook is archived in `legacy/` because it is incomplete and not part of
+the current Shiny app or ETL flow.
+
 ```{r}
 library(rvest)
 library(xml2)
@@ -144,5 +147,4 @@ establishment <- lapply(dataframes_list, function(estabCount){
 })
 
 ```
-
 
