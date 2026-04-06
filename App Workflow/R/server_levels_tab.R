@@ -228,16 +228,23 @@ levels_tab_server <- function(input, output, session,
     } else {
       round(df[[metric_col]], 4)
     }
+
+    safe_round_col <- function(data, col_name, digits) {
+      if (!col_name %in% names(data)) {
+        return(rep(NA_real_, nrow(data)))
+      }
+      round(data[[col_name]], digits)
+    }
     
     # Build table using $ notation throughout
     result <- data.frame(
       State                    = to_title(df$state_name),
       `Selected Metric`        = metric_values,
-      `GDP per Job (Real)`     = round(df$gdp_per_job_real_2017, 0),
-      `Weekly Wage (Nominal)`  = round(df$qcew_avg_weekly_wage_nominal, 0),
-      `Weekly Wage (Real RPP)` = round(df$qcew_avg_weekly_wage_real_rpp, 0),
-      `RPP`                    = round(df$rpp_all_items_index, 1),
-      `Comp/Prod Ratio`        = round(df$wage_to_productivity_ratio_real, 4),
+      `GDP per Job (Real)`     = safe_round_col(df, "gdp_per_job_real_2017", 0),
+      `Weekly Wage (Nominal)`  = safe_round_col(df, "qcew_avg_weekly_wage_nominal", 0),
+      `Weekly Wage (Real RPP)` = safe_round_col(df, "qcew_avg_weekly_wage_real_rpp", 0),
+      `RPP`                    = safe_round_col(df, "rpp_all_items_index", 1),
+      `Comp/Prod Ratio`        = safe_round_col(df, "wage_to_productivity_ratio_real", 4),
       check.names = FALSE
     )
     
