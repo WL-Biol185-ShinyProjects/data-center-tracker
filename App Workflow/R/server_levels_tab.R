@@ -123,19 +123,17 @@ levels_tab_server <- function(input, output, session,
   })
   
   
-  # ---- Levels: Scatter Plot UI (plotly or static) ----
-  # Checks if plotly is installed - uses interactive version if yes
+  # ---- Levels: Scatter Plot UI ----
+  # Use the static renderer consistently across environments.
+  # The plotly conversion has been error-prone on some Posit Workbench setups.
   output$levels_scatter_ui <- renderUI({
-    if (requireNamespace("plotly", quietly = TRUE)) {
-      return(plotly::plotlyOutput("levels_scatter", height = "420px"))
-    }
     plotOutput("levels_scatter_static", height = "420px")
   })
   
   
   # ---- Levels: Plotly Scatter ----
   # Interactive scatter: GDP per job (x) vs weekly wage (y), one dot per state
-  if (requireNamespace("plotly", quietly = TRUE)) {
+  if (FALSE && requireNamespace("plotly", quietly = TRUE)) {
     output$levels_scatter <- plotly::renderPlotly({
       
       df <- as.data.frame(levels_scatter_data())
