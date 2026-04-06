@@ -8,6 +8,18 @@
 
 levels_tab_server <- function(input, output, session,
                               levels_data) {
+
+  selected_levels_metric <- reactive({
+    req(!is.null(levels_data()))
+
+    metric_col <- input$levels_metric
+
+    req(!is.null(metric_col), nzchar(metric_col))
+    req(metric_col %in% names(levels_metric_labels))
+    req(metric_col %in% names(levels_data()))
+
+    metric_col
+  })
   
   # ---- Levels: Filtered to Selected Year ----
   levels_yearly_data <- reactive({
@@ -35,7 +47,7 @@ levels_tab_server <- function(input, output, session,
     validate(need(!is.null(levels_data()),
                   "Levels data not loaded."))
     
-    metric_col   <- input$levels_metric
+    metric_col   <- selected_levels_metric()
     metric_label <- levels_metric_labels[[metric_col]]
     
     # Filter to rows with data for chosen metric
@@ -202,7 +214,7 @@ levels_tab_server <- function(input, output, session,
     validate(need(!is.null(levels_data()),
                   "Levels data not loaded."))
     
-    metric_col       <- input$levels_metric
+    metric_col       <- selected_levels_metric()
     metric_is_dollar <- metric_col %in% c("gdp_per_job_real_2017",
                                           "qcew_avg_weekly_wage_real_rpp")
     
@@ -236,10 +248,10 @@ levels_tab_server <- function(input, output, session,
   # ---- Levels: Download ----
   output$download_levels <- downloadHandler(
     filename = function() {
-      sprintf("levels_%s_%s.csv", input$levels_metric, input$year)
+      sprintf("levels_%s_%s.csv", selected_levels_metric(), input$year)
     },
     content = function(file) {
-      metric_col <- input$levels_metric
+      metric_col <- selected_levels_metric()
       df <- levels_yearly_data() %>%
         filter(!is.na(.data[[metric_col]]))
       write.csv(df, file, row.names = FALSE)
