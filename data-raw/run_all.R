@@ -12,7 +12,7 @@ script_dir <- dirname(normalizePath(script_path))
 project_root <- normalizePath(file.path(script_dir, ".."))
 setwd(project_root)
 
-source(file.path("R", "helpers.R"))
+source(file.path("data-raw", "helpers_etl.R"))
 
 base_year <- 2007
 
@@ -204,12 +204,13 @@ state_panel <- state_panel_raw %>%
   ) %>%
   arrange(year, state_name)
 
-dir.create("data", showWarnings = FALSE, recursive = TRUE)
-utils::write.csv(series_catalog, file.path("data", "series_catalog.csv"), row.names = FALSE)
-utils::write.csv(state_metrics_long, file.path("data", "state_metrics_long.csv"), row.names = FALSE)
-utils::write.csv(state_panel, file.path("data", "state_panel.csv"), row.names = FALSE)
+output_dir <- file.path("App Workflow", "data")
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+utils::write.csv(series_catalog, file.path(output_dir, "series_catalog.csv"), row.names = FALSE)
+utils::write.csv(state_metrics_long, file.path(output_dir, "state_metrics_long.csv"), row.names = FALSE)
+utils::write.csv(state_panel, file.path(output_dir, "state_panel.csv"), row.names = FALSE)
 
 message("Done.")
 message(sprintf("Series discovered: %s", nrow(series_catalog)))
-message(sprintf("Rows written to data/state_metrics_long.csv: %s", nrow(state_metrics_long)))
-message(sprintf("Rows written to data/state_panel.csv: %s", nrow(state_panel)))
+message(sprintf("Rows written to App Workflow/data/state_metrics_long.csv: %s", nrow(state_metrics_long)))
+message(sprintf("Rows written to App Workflow/data/state_panel.csv: %s", nrow(state_panel)))

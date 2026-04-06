@@ -17,6 +17,14 @@ comparison_tab <- tabPanel(
     column(
       width = 3,
       wellPanel(
+        p(
+          strong("Question answered:"),
+          " did productivity and compensation separate gradually or sharply in the states you care about?"
+        ),
+        p(
+          strong("What this chart shows:"),
+          " two indexed time series for each selected state, so you can see whether the gap widens, narrows, or reverses over time."
+        ),
         
         # First state dropdown (filled by server) ----
         selectInput(
@@ -43,7 +51,7 @@ comparison_tab <- tabPanel(
         
         tags$small(
           class = "text-muted",
-          "Uses the wage basis selected on the Map View tab."
+          "The compare button overlays one or two states using the same wage basis selected on the Map View tab."
         )
       )
     ),
@@ -52,9 +60,13 @@ comparison_tab <- tabPanel(
     column(
       width = 9,
       plotOutput("state_trends", height = "420px"),
+      tags$p(
+        class = "text-muted",
+        "This is the best tab for showing how the visual evidence connects back to the main question over time, not just in one snapshot year.",
+        style = "margin-top: 10px;"
+      ),
       tags$br(),
       downloadButton("download_state_trends", "Download State Data (CSV)")
     )
   )
 )
-

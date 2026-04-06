@@ -20,6 +20,10 @@ levels_tab <- tabPanel(
     column(
       width = 3,
       wellPanel(
+        p(
+          strong("Question answered:"),
+          " are high-productivity states also high-wage states when we compare actual levels rather than just indexed growth?"
+        ),
         
         p("BEA GDP/job + QCEW wages (RPP-adjusted for real metrics).",
           style = "font-size: 0.9em;"),
@@ -48,11 +52,16 @@ levels_tab <- tabPanel(
       
       # Levels choropleth map
       plotOutput("levels_map", height = "420px"),
+      tags$p(
+        class = "text-muted",
+        "The map shows the chosen levels metric for one year, while the scatter checks whether higher GDP per job is actually paired with higher pay across states.",
+        style = "margin-top: 10px;"
+      ),
       
       tags$br(),
       
       # Scatter plot - GDP per job vs weekly wage
-      plotOutput("levels_scatter_static", height = "420px"),
+      uiOutput("levels_scatter_ui"),
       
       tags$br(),
       
@@ -64,4 +73,3 @@ levels_tab <- tabPanel(
     )
   )
 )
-

@@ -5,11 +5,26 @@
 # Everyone sources this. Only the data person edits it.
 # ============================================================
 
+# Resolve data files across the reorganized repo/app layout.
+resolve_data_path <- function(filename) {
+  candidates <- c(
+    file.path("data", filename),
+    file.path("App Workflow", "data", filename),
+    file.path("..", "App Workflow", "data", filename),
+    file.path("..", "data", filename)
+  )
+  hits <- candidates[file.exists(candidates)]
+  if (length(hits) == 0) {
+    return(NULL)
+  }
+  hits[[1]]
+}
+
 
 # ---- Load Growth Panel Data ----
 load_panel_data <- function() {
-  data_path <- file.path("data", "state_panel.csv")
-  if (!file.exists(data_path)) {
+  data_path <- resolve_data_path("state_panel.csv")
+  if (is.null(data_path)) {
     return(NULL)
   }
   read.csv(data_path, stringsAsFactors = FALSE)
@@ -18,8 +33,8 @@ load_panel_data <- function() {
 
 # ---- Load Levels Data ----
 load_levels_data <- function() {
-  data_path <- file.path("data", "state_levels_panel.csv")
-  if (!file.exists(data_path)) {
+  data_path <- resolve_data_path("state_levels_panel.csv")
+  if (is.null(data_path)) {
     return(NULL)
   }
   df <- read.csv(data_path, stringsAsFactors = FALSE)
@@ -89,8 +104,8 @@ levels_metric_choices <- stats::setNames(
 )
 # ---- Load Outside US Data ----  #new EU Data
 load_outside_us_data <- function() {
-  data_path <- file.path("data", "EUdata.csv")
-  if (!file.exists(data_path)) {
+  data_path <- resolve_data_path("EUdata.csv")
+  if (is.null(data_path)) {
     return(NULL)
   }
   read.csv(data_path, stringsAsFactors = FALSE)
